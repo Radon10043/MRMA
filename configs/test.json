@@ -1,0 +1,57 @@
+{
+    "agent_iden": {
+        "model": "gpt-4o-mini",
+        "temperature": 1.0,
+        "top_p": 0.9,
+        "external_corpus": "/vol/MR-CoT-RAG/data/Bsearch2.md",
+        "prompts": {
+            "system": "/vol/MR-CoT-RAG/data/prompts/iden/system.md",
+            "user": [
+                "/vol/MR-CoT-RAG/data/prompts/iden/user1.md",
+                "/vol/MR-CoT-RAG/data/prompts/iden/user2.md"
+            ]
+        }
+    },
+    "agent_distn": {
+        "model": "gpt-4o-mini",
+        "temperature": 1.0,
+        "top_p": 0.9,
+        "prompts": {
+            "system": "/vol/MR-CoT-RAG/data/prompts/distn/system.md",
+            "user": [
+                "/vol/MR-CoT-RAG/data/prompts/distn/user1.md",
+                "/vol/MR-CoT-RAG/data/prompts/distn/user2.md"
+            ]
+        }
+    },
+    "agent_cali": [
+        {
+            "model": "gemini-2.5-pro",
+            "temperature": 1.0,
+            "top_p": 0.9,
+            "prompts": {
+                "system": "/vol/MR-CoT-RAG/data/prompts/cali/system.md",
+                "user": [
+                    "/vol/MR-CoT-RAG/data/prompts/cali/user1.md",
+                    "/vol/MR-CoT-RAG/data/prompts/cali/user2.md"
+                ]
+            }
+        },
+        {
+            "model": "deepseek-r1",
+            "temperature": 1.0,
+            "top_p": 0.9,
+            "prompts": {
+                "system": "/vol/MR-CoT-RAG/data/prompts/cali/system.md",
+                "user": [
+                    "/vol/MR-CoT-RAG/data/prompts/cali/user1.md",
+                    "/vol/MR-CoT-RAG/data/prompts/cali/user2.md"
+                ]
+            }
+        }
+    ],
+    "confidence_calc": "EXP",
+    "confidence_threshold": 0.6,
+    "max_MRs": 40,
+    "max_iter": 2
+}

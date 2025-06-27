@@ -1,0 +1,1 @@
+Please identify more different metamorphic relations of binary search algorithm.

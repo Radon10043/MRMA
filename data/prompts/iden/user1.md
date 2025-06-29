@@ -1,1 +1,1 @@
-Please identify metamorphic relation of binary search algorithm.
+Please identify metamorphic relation of {SUT name} and codified it.

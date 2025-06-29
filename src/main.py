@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-06-27 21:12:45
+LastEditTime : 2025-06-29 12:11:42
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -175,7 +175,7 @@ def main(usr_config: dict):
         # Generate unique thread IDs for chating iteratively
         thread_id_dict = dict()
         thread_id_dict["iden"] = uuid.uuid4().hex
-        thread_id_dict["dist"] = uuid.uuid4().hex
+        thread_id_dict["distn"] = uuid.uuid4().hex
         thread_id_dict["cali"] = [uuid.uuid4().hex for _ in range(len(agent_cali))]
 
         # Start a new chat to identify one metamorphic relation candidate

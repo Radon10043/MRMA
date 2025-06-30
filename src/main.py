@@ -2,11 +2,12 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-06-30 20:09:44
+LastEditTime : 2025-06-30 22:14:54
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
 import argparse
+import dis
 import json
 import math
 import uuid
@@ -22,15 +23,20 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
+from sqlalchemy import all_
 
 from utils import *
 
+# fmt:off
 ########## GLOBAL VARIABLES ##########
-VECTOR_STORE = None
-ALPHA = 0.8
-BETA = 0.4
-EPSILON = 0.1
+VECTOR_STORE = None     # Vector store for external corpus
+ALPHA = 1.0             # Factor of temperature
+BETA = 0.5              # Factor of top_p
+EPSILON = 0.1           # A small constant to avoid division by zero
+MAX_WEIGHT = 10.0       # Maximum weight for quadratic score calculation
+GEMMA = 8.0             # Factor of (ALPHA*temperature + BETA*top_p)^2 in quadratic score calculation
 ######################################
+# fmt:on
 
 
 class Agent:
@@ -48,6 +54,7 @@ class Agent:
             Dictionary of replacements for the prompt template, by default an empty dict
         """
         self.config = config
+        self.runnable_config = RunnableConfig({"configurable": {"thread_id": "foo"}})  # Placeholder for thread ID
         self.llm = init_chat_model(
             model=config.get("model"),
             temperature=config.get("temperature", 1.0),
@@ -85,7 +92,8 @@ def calculate_score_exp(agents: list[Agent], results: list[bool]) -> float:
     for i in range(len(agents)):
         temp = agents[i].config["temperature"]
         top_p = agents[i].config["top_p"]
-        w = math.exp(-ALPHA * temp - BETA * top_p)
+        d = ALPHA * temp + BETA * top_p
+        w = math.exp(-d)
         j = 1 if results[i] else 0
         mol += w * j
         den += w
@@ -93,9 +101,91 @@ def calculate_score_exp(agents: list[Agent], results: list[bool]) -> float:
     return score
 
 
-def calculate_score_rec(agents: list[Agent], results: list[bool]) -> float:
-    # TODO: Implement the recursive confidence score calculation
-    return 0.0
+def calculate_score_lin(agents: list[Agent], results: list[bool]) -> float:
+    """Calculate the confidence score using a linear? method.
+
+    Parameters
+    ----------
+    agents : list[Agent]
+        List of agents involved in the calibration process.
+    results : list[bool]
+        List of boolean results from the calibration agents.
+
+    Returns
+    -------
+    float
+        The calculated confidence score.
+    """
+    mol = 0.0
+    den = 0.0
+    for i in range(len(agents)):
+        temp = agents[i].config["temperature"]
+        top_p = agents[i].config["top_p"]
+        d = ALPHA * temp + BETA * top_p
+        w = 1.0 / (d + EPSILON)
+        j = 1 if results[i] else 0
+        mol += w * j
+        den += w
+    score = mol / den if den > 0 else -1.0
+    return score
+
+
+def calculate_score_log(agents: list[Agent], results: list[bool]) -> float:
+    """Calculate the confidence score using a logarithmic method.
+
+    Parameters
+    ----------
+    agents : list[Agent]
+        List of agents involved in the calibration process.
+    results : list[bool]
+        List of boolean results from the calibration agents.
+
+    Returns
+    -------
+    float
+        The calculated confidence score.
+    """
+    mol = 0.0
+    den = 0.0
+    for i in range(len(agents)):
+        temp = agents[i].config["temperature"]
+        top_p = agents[i].config["top_p"]
+        d = ALPHA * temp + BETA * top_p
+        w = 1.0 / (math.log(d + 1.0) + EPSILON)
+        j = 1 if results[i] else 0
+        mol += w * j
+        den += w
+    score = mol / den if den > 0 else -1.0
+    return score
+
+
+def calculate_score_qua(agents: list[Agent], results: list[bool]) -> float:
+    """Calculate the confidence score using a quadratic method.
+
+    Parameters
+    ----------
+    agents : list[Agent]
+        List of agents involved in the calibration process.
+    results : list[bool]
+        List of boolean results from the calibration agents.
+
+    Returns
+    -------
+    float
+        The calculated confidence score.
+    """
+    mol = 0.0
+    den = 0.0
+    for i in range(len(agents)):
+        temp = agents[i].config["temperature"]
+        top_p = agents[i].config["top_p"]
+        d = ALPHA * temp + BETA * top_p
+        w = max(0, MAX_WEIGHT - GEMMA * d**2)
+        j = 1 if results[i] else 0
+        mol += w * j
+        den += w
+    score = mol / den if den > 0 else -1.0
+    return score
 
 
 def calculate_score(agents: list[Agent], results: list[bool], method: str) -> float:
@@ -117,14 +207,39 @@ def calculate_score(agents: list[Agent], results: list[bool], method: str) -> fl
     """
     if method == "EXP":
         return calculate_score_exp(agents, results)
-    elif method == "REC":
-        return calculate_score_rec(agents, results)
+    elif method == "LIN":
+        return calculate_score_lin(agents, results)
+    elif method == "LOG":
+        return calculate_score_log(agents, results)
     return -1.0  # Unlikely to reach here, but just in case
 
 
-def distillation():
+def distill(agent: Agent, messages: list[str], results: list[bool]) -> str:
+    """Distill the error messages from calibration agents to generate a concise error message.
+
+    Parameters
+    ----------
+    agent : Agent
+        The agent responsible for distillation.
+    messages : list[str]
+        List of error messages from calibration agents.
+
+    Returns
+    -------
+    str
+        A distilled error message summarizing the issues found by calibration agents.
+    """
     # TODO: Implement the distillation process
-    pass
+    all_messages = str()
+    for i in range(len(messages)):
+        if results[i]:
+            continue
+        all_messages += f"Agent {i + 1} reported an error:\n\n{messages[i]}\n\n"
+    response = agent.instance.invoke(
+        {"messages": [{"role": "user", "content": messages[i]}]},
+        config=agent.runnable_config,   # Maybe iterative chat is unnecessary for distillation?
+    )
+    return response["messages"][-1].content
 
 
 def init_vector_store(corpus_path: str):
@@ -186,6 +301,7 @@ def main(usr_config: dict):
     config_distn = usr_config["agent_distn"]
     replacements = usr_config["replacements"]
     calc_method = usr_config.get("confidence_calc", "EXP")
+    score_threshold = usr_config.get("score_threshold", 0.6)
     max_mrs, max_iter = usr_config["max_MRs"], usr_config["max_iter"]
 
     # Replace placeholders in the replacements dictionary
@@ -214,6 +330,13 @@ def main(usr_config: dict):
         thread_id_dict["iden"] = uuid.uuid4().hex
         thread_id_dict["distn"] = uuid.uuid4().hex
         thread_id_dict["cali"] = [uuid.uuid4().hex for _ in range(len(agent_cali))]
+        agent_iden.runnable_config = RunnableConfig({"configurable": {"thread_id": thread_id_dict["iden"]}})
+        agent_distn.runnable_config = RunnableConfig({"configurable": {"thread_id": thread_id_dict["distn"]}})
+        for i in range(len(agent_cali)):
+            agent_cali[i].runnable_config = RunnableConfig({"configurable": {"thread_id": thread_id_dict["cali"][i]}})
+
+        # Prepare some variables for the iterative chat
+        distn_err_msg = str()
 
         # Start a new chat to identify one metamorphic relation candidate
         while index < max_iter:
@@ -223,7 +346,7 @@ def main(usr_config: dict):
             usr_prompt = prompt_template.invoke(replacements).to_string()
             response = agent_iden.instance.invoke(
                 {"messages": [{"role": "user", "content": usr_prompt}]},
-                config=RunnableConfig({"configurable": {"thread_id": thread_id_dict["iden"]}}),
+                config=agent_iden.runnable_config,
             )
 
             # Extract metamorphic relation candidate
@@ -232,25 +355,33 @@ def main(usr_config: dict):
             # Prompt calibration agents to verify the MR candidate
             # TODO:It can be executed in parallel
             cali_res_lst = list()
+            cali_msg_lst = list()
             for agent in agent_cali:
                 i = min(index, len(agent.config["prompts"]["user"]) - 1)
                 prompt_template = PromptTemplate.from_file(agent.config["prompts"]["user"][i])
                 usr_prompt = prompt_template.partial(**replacements).invoke({"gen_mrc": candidate}).to_string()
                 response = agent.instance.invoke(
                     {"messages": [{"role": "user", "content": usr_prompt}]},
-                    config=RunnableConfig({"configurable": {"thread_id": thread_id_dict["cali"][index]}}),
+                    config=agent.runnable_config,
                 )
-                cali_res = get_first_code_block(response["messages"][-1].content)
+                cali_msg = response["messages"][-1].content
+                cali_res = get_first_code_block(cali_msg)
+                cali_msg_lst.append(cali_msg)
                 if "invalid" in cali_res.lower():
                     cali_res_lst.append(False)
                 else:
                     cali_res_lst.append(True)
 
-            # TODO: Calculate confidence score of calibration
+            # Calculate confidence score of calibration
             score = calculate_score(agent_cali, cali_res_lst, calc_method)
 
             # TODO: If confidence score less than threshold, collect & distill the error messages,
             # else, open a new chat to generate a new MR candidate
+            if score < score_threshold:
+                err_msg = distill(agent_distn, cali_msg_lst, cali_res_lst)
+            else:
+                # TODO: Goto next iteration, add the MR candidate to the prompt to prevent duplicates
+                break
 
             index += 1
 

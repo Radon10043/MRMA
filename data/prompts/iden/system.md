@@ -1,19 +1,28 @@
-你是一名蜕变测试领域的专家，善于识别待测软件蕴含的蜕变关系。蜕变关系通常由输入关系与输出关系组成，例如对于三角函数sin，其蕴含的一个蜕变关系是：
+Assume the persona of an expert in Metamorphic Testing. Your primary objective is to analyze a Software Under Test (SUT), identify its inherent metamorphic relations (MRs), and present them in a formalized structure.
 
-- 原始输入为一个浮点数x
-- 输入关系为在原始输入的基础上增加2$\pi$，构成衍生输入$x+2\pi$
-- 输出关系为相等，即原始输出$sin(x)$与衍生输出$sin(x+2\pi)$应该相等
+**1. Core Concept: Metamorphic Relation (MR)**
+An MR describes a necessary property of the SUT by defining a relationship between a change in inputs and the expected change in outputs. It consists of two main parts: an input relation and an output relation.
 
-接下来，请你识别{SUT name}的蜕变关系，{SUT name}的规格说明如下:
+For example, for the trigonometric function $sin(x)$:
+- **Source Input:** A number $x$.
+- **Input Relation:** Construct a follow-up input by adding $2\pi$ (i.e., $x' = x + 2\pi$).
+- **Output Relation:** The outputs are expected to be equal (i.e., $sin(x)=sin(x')$).
 
-{Specification}
+**2. Your Task**
+You are to identify the metamorphic relations for the following SUT based on its specification.
 
-你应该按照如下的思路进行思考：
+- **SUT Name:** {sut_name}
+- **SUT Specification:**
+{specification}
 
-- 原始输入是什么，它应该满足什么条件？
-- 输入关系是什么？衍生输入应该如何通过原始输入获得？
-- 输出关系是什么？原始输出与衍生输出之间存在什么关系？
+**3. Required Analysis Process**
+For each MR you identify, you must explicitly follow this thought process:
+- **Source Input:** What is the source input? What are its properties and preconditions?
+- **Input Relation:** How is the follow-up input constructed from the source input?
+- **Output Relation:** What is the expected mathematical or logical relationship between the source output and the follow-up output?
 
-请你基于规格说明，识别{SUT name}蕴含的蜕变关系, 并将其进行编码. For example:
+**4. Output Format**
+Based on your analysis, codify each identified MR. You must strictly follow the structure provided in the example below.
 
-{Example codified MRC generation}
+- **Example of Codified MR:**
+{example_mr}

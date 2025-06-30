@@ -1,5 +1,5 @@
-Thank you! 我已按照你所提供的信息对MRC进行了修改, 我修改后的MRC如下:
+Thank you. I have revised the Metamorphic Relation Candidate (MRC) based on your feedback. Here is the new version:
 
-{Generated MRC}
+{gen_mrc}
 
-请你分析我修改后的MRC是否正确反应了{SUT name}的属性, 并给出原因.
+Please analyze this revised MRC. Does it now correctly reflect the properties of {SUT name}? Please provide the reasons for your conclusion.

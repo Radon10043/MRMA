@@ -3,7 +3,7 @@
         "model": "gpt-4o-mini",
         "temperature": 1.0,
         "top_p": 0.9,
-        "external_corpus": "/vol/MR-CoT-RAG/data/Bsearch2.md",
+        "external_corpus": "/vol/MR-CoT-RAG/data/corpus/Bsearch2.md",
         "prompts": {
             "system": "/vol/MR-CoT-RAG/data/prompts/iden/system.md",
             "user": [
@@ -50,8 +50,14 @@
             }
         }
     ],
+    "replacements": {
+        "sut_name": "Binary Search Algorithm",
+        "specification": "/vol/MR-CoT-RAG/data/specs/Bsearch2.md",
+        "example_mr": "/vol/MR-CoT-RAG/data/example-MRs/Bsearch2.md",
+        "example_analysis": "/vol/MR-CoT-RAG/data/example-analysis/Bsearch2.md"
+    },
     "confidence_calc": "EXP",
     "confidence_threshold": 0.6,
-    "max_MRs": 40,
+    "max_MRs": 1,
     "max_iter": 2
 }

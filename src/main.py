@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-06-29 12:11:42
+LastEditTime : 2025-06-30 20:09:44
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -10,9 +10,11 @@ import argparse
 import json
 import math
 import uuid
+from pathlib import Path
 
 from langchain.chat_models import init_chat_model
 from langchain_community.document_loaders import TextLoader
+from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 from langchain_core.vectorstores import InMemoryVectorStore
@@ -33,7 +35,7 @@ EPSILON = 0.1
 
 class Agent:
 
-    def __init__(self, config: dict, tools: list):
+    def __init__(self, config: dict, tools: list, replacements: dict = {}):
         """Initialize an agent with a chat model and tools.
 
         Parameters
@@ -42,16 +44,18 @@ class Agent:
             Configuration dictionary.
         tools : list
             List of tools to be used by the agent.
+        replacements : dict, optional
+            Dictionary of replacements for the prompt template, by default an empty dict
         """
+        self.config = config
         self.llm = init_chat_model(
             model=config.get("model"),
             temperature=config.get("temperature", 1.0),
             model_provider="openai",
             top_p=config.get("top_p", 0.9),
         )
-        sys_prompt = str()
-        with open(config["prompts"]["system"], "r", encoding="utf-8") as f:
-            sys_prompt = f.read()
+        prompt_template = PromptTemplate.from_file(config["prompts"]["system"])
+        sys_prompt = prompt_template.invoke(replacements).to_string()
         memory = MemorySaver()
         self.instance = create_react_agent(
             model=self.llm,
@@ -61,21 +65,48 @@ class Agent:
         )
 
 
-def calculate_score_exp(agents: list[Agent]) -> float:
-    # TODO: Implement the exponential confidence score calculation
-    return 0.0
+def calculate_score_exp(agents: list[Agent], results: list[bool]) -> float:
+    """Calculate the confidence score based on exponential decay.
+
+    Parameters
+    ----------
+    agents : list[Agent]
+        List of agents involved in the calibration process.
+    results : list[bool]
+        List of boolean results from the calibration agents.
+
+    Returns
+    -------
+    float
+        The calculated confidence score.
+    """
+    mol = 0.0
+    den = 0.0
+    for i in range(len(agents)):
+        temp = agents[i].config["temperature"]
+        top_p = agents[i].config["top_p"]
+        w = math.exp(-ALPHA * temp - BETA * top_p)
+        j = 1 if results[i] else 0
+        mol += w * j
+        den += w
+    score = mol / den if den > 0 else -1.0
+    return score
 
 
-def calculate_score_rec(agents: list[Agent]) -> float:
+def calculate_score_rec(agents: list[Agent], results: list[bool]) -> float:
     # TODO: Implement the recursive confidence score calculation
     return 0.0
 
 
-def calculate_score(agents: list[Agent], method: str) -> float:
+def calculate_score(agents: list[Agent], results: list[bool], method: str) -> float:
     """Confidence score calculation based on the specified method.
 
     Parameters
     ----------
+    agents : list[Agent]
+        List of agents involved in the calibration process.
+    results : list[bool]
+        List of boolean results from the calibration agents, where True indicates a valid MR candidate and False indicates an invalid one.
     method : str
         The method for confidence score calculation. Options are "EXP", "REC", etc.
 
@@ -85,9 +116,9 @@ def calculate_score(agents: list[Agent], method: str) -> float:
         The calculated confidence score.
     """
     if method == "EXP":
-        return calculate_score_exp(agents)
+        return calculate_score_exp(agents, results)
     elif method == "REC":
-        return calculate_score_rec(agents)
+        return calculate_score_rec(agents, results)
     return -1.0  # Unlikely to reach here, but just in case
 
 
@@ -153,18 +184,24 @@ def main(usr_config: dict):
     config_iden = usr_config["agent_iden"]
     config_cali = usr_config["agent_cali"]
     config_distn = usr_config["agent_distn"]
+    replacements = usr_config["replacements"]
     calc_method = usr_config.get("confidence_calc", "EXP")
     max_mrs, max_iter = usr_config["max_MRs"], usr_config["max_iter"]
+
+    # Replace placeholders in the replacements dictionary
+    for key, value in replacements.items():
+        if isinstance(value, str) and Path(value).exists():
+            replacements[key] = Path(value).read_text(encoding="utf-8")
 
     # Initialize vector store
     init_vector_store(config_iden.get("external_corpus"))
 
     # Initialize identification, calibration, and distilliation agents
-    agent_iden = Agent(config_iden, [retrieve])
-    agent_distn = Agent(config_distn, [])
+    agent_iden = Agent(config_iden, [retrieve], replacements)
+    agent_distn = Agent(config_distn, [], replacements)
     agent_cali = list()
     for cfg in config_cali:
-        agent = Agent(cfg, [])
+        agent = Agent(cfg, [], replacements)
         agent_cali.append(agent)
 
     # Start metamorphic relation identification loop
@@ -181,20 +218,36 @@ def main(usr_config: dict):
         # Start a new chat to identify one metamorphic relation candidate
         while index < max_iter:
             # Prompt identification agent to generate a metamorphic relation candidate
-            usr_prompt = str()
-            i = min(index, len(config_iden["prompts"]["user"]) - 1)
-            with open(config_iden["prompts"]["user"][i], "r", encoding="utf-8") as f:
-                usr_prompt = f.read()
+            i = min(index, len(agent_iden.config["prompts"]["user"]) - 1)
+            prompt_template = PromptTemplate.from_file(agent_iden.config["prompts"]["user"][i])
+            usr_prompt = prompt_template.invoke(replacements).to_string()
             response = agent_iden.instance.invoke(
                 {"messages": [{"role": "user", "content": usr_prompt}]},
                 config=RunnableConfig({"configurable": {"thread_id": thread_id_dict["iden"]}}),
             )
 
-            # TODO: Extract metamorphic relation candidate
+            # Extract metamorphic relation candidate
+            candidate = get_first_code_block(response["messages"][-1].content)
 
-            # TODO: Prompt calibration agents to verify the MR candidate
+            # Prompt calibration agents to verify the MR candidate
+            # TODO:It can be executed in parallel
+            cali_res_lst = list()
+            for agent in agent_cali:
+                i = min(index, len(agent.config["prompts"]["user"]) - 1)
+                prompt_template = PromptTemplate.from_file(agent.config["prompts"]["user"][i])
+                usr_prompt = prompt_template.partial(**replacements).invoke({"gen_mrc": candidate}).to_string()
+                response = agent.instance.invoke(
+                    {"messages": [{"role": "user", "content": usr_prompt}]},
+                    config=RunnableConfig({"configurable": {"thread_id": thread_id_dict["cali"][index]}}),
+                )
+                cali_res = get_first_code_block(response["messages"][-1].content)
+                if "invalid" in cali_res.lower():
+                    cali_res_lst.append(False)
+                else:
+                    cali_res_lst.append(True)
 
             # TODO: Calculate confidence score of calibration
+            score = calculate_score(agent_cali, cali_res_lst, calc_method)
 
             # TODO: If confidence score less than threshold, collect & distill the error messages,
             # else, open a new chat to generate a new MR candidate
@@ -207,7 +260,7 @@ def main(usr_config: dict):
 
         cnt += 1
 
-    pass
+    OKF("We're done here!")
 
 
 if __name__ == "__main__":

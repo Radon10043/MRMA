@@ -1,7 +1,8 @@
-感谢你的努力, 然而我认为该蜕变关系的质量不足以准确反应{SUT name}的属性, 原因如下:
+The previously generated metamorphic relation is not accurate enough. Please revise it based on the following feedback.
 
-```
-{Error message}
-```
+**Feedback:**
+{distn_error_messages}
 
-请你基于我所提供的信息, 继续修改所生成的蜕变关系以提高质量. 请注意, 你应该只将编码蜕变关系放入代码块中, 其他文字均不能放入代码块.
+Your task is to refine the metamorphic relation to address these specific points.
+
+**Important:** Place only the final, codified metamorphic relation in the code block. All explanatory text must be outside of it.

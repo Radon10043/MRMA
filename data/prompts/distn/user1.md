@@ -1,1 +1,1 @@
-{Error messages}
+{error_messages}

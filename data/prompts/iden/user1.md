@@ -1,1 +1,1 @@
-Please identify metamorphic relation of {SUT name} and codified it.
+Please identify metamorphic relation of {sut_name} and codified it.

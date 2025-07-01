@@ -178,3 +178,4 @@ pyrightconfig.json
 ### Custom ###
 .vscode/*
 !.vscode/settings.json
+workdir/*

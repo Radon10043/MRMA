@@ -2,4 +2,4 @@ Thank you. I have revised the Metamorphic Relation Candidate (MRC) based on your
 
 {gen_mrc}
 
-Please analyze this revised MRC. Does it now correctly reflect the properties of {SUT name}? Please provide the reasons for your conclusion.
+Please analyze this revised MRC. Does it now correctly reflect the properties of {sut_name}? Please provide the reasons for your conclusion.

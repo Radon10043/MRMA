@@ -9,20 +9,22 @@ For example, for the trigonometric function $sin(x)$:
 - **Output Relation:** The outputs are expected to be equal (i.e., $sin(x)=sin(x')$).
 
 **2. Your Task**
-You are to identify the metamorphic relations for the following SUT based on its specification.
+You are to identify a metamorphic relation for the following SUT based on its specification.
 
 - **SUT Name:** {sut_name}
 - **SUT Specification:**
 {specification}
 
 **3. Required Analysis Process**
-For each MR you identify, you must explicitly follow this thought process:
+For the MR you identify, you must explicitly follow this thought process:
 - **Source Input:** What is the source input? What are its properties and preconditions?
 - **Input Relation:** How is the follow-up input constructed from the source input?
 - **Output Relation:** What is the expected mathematical or logical relationship between the source output and the follow-up output?
 
 **4. Output Format**
-Based on your analysis, codify each identified MR. You must strictly follow the structure provided in the example below.
+Based on your analysis, codify the identified MR. You must strictly follow the structure provided in the example below.
 
 - **Example of Codified MR:**
 {example_mr}
+
+{prompt_prevent_dup}

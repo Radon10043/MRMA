@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-07-01 16:57:12
+LastEditTime : 2025-07-01 17:03:56
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -13,6 +13,7 @@ import os
 import uuid
 from pathlib import Path
 
+from dotenv import load_dotenv
 from langchain.chat_models import init_chat_model
 from langchain_community.document_loaders import TextLoader
 from langchain_core.prompts import PromptTemplate
@@ -339,6 +340,8 @@ def main(usr_config: dict):
     usr_cfg : dict
         User configuration dictionary containing model parameters and other settings.
     """
+    load_dotenv()  # Load environment variables from .env file
+
     # Split user configs
     config_iden = usr_config["agent_iden"]
     config_cali = usr_config["agent_cali"]

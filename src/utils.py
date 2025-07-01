@@ -2,12 +2,13 @@
 Author       : Radon
 Date         : 2025-06-27 16:42:43
 LastEditors  : Radon
-LastEditTime : 2025-06-27 20:42:51
+LastEditTime : 2025-07-01 14:19:09
 Description  : Utility functions
 """
 
-import marko
+import time
 
+import marko
 from marko.md_renderer import MarkdownRenderer
 
 
@@ -99,3 +100,16 @@ def get_first_code_block(md_text: str) -> str:
 
     # Return the code block as a string
     return "\n".join(code_list)
+
+
+def get_cur_time_ms() -> int:
+    """Get the current timestamp in milliseconds.
+
+    Returns
+    -------
+    int
+        The current timestamp in milliseconds.
+    """
+    now = time.time_ns()
+    ms = now // 1_000_000
+    return ms

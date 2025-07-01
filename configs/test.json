@@ -19,8 +19,7 @@
         "prompts": {
             "system": "/vol/MR-CoT-RAG/data/prompts/distn/system.md",
             "user": [
-                "/vol/MR-CoT-RAG/data/prompts/distn/user1.md",
-                "/vol/MR-CoT-RAG/data/prompts/distn/user2.md"
+                "/vol/MR-CoT-RAG/data/prompts/distn/user1.md"
             ]
         }
     },
@@ -38,7 +37,7 @@
             }
         },
         {
-            "model": "deepseek-r1",
+            "model": "o4-mini",
             "temperature": 1.0,
             "top_p": 0.9,
             "prompts": {
@@ -58,6 +57,7 @@
     },
     "score_calc": "EXP",
     "score_threshold": 0.6,
-    "max_MRs": 1,
-    "max_iter": 2
+    "max_MRs": 2,
+    "max_iter": 10,
+    "output": "/vol/MR-CoT-RAG/workdir/debug"
 }

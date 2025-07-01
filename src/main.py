@@ -2,11 +2,12 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-07-01 17:03:56
+LastEditTime : 2025-07-01 17:58:09
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
 import argparse
+import concurrent.futures
 import json
 import math
 import os
@@ -374,9 +375,6 @@ def main(usr_config: dict):
     cnt = 0  # Counter for the number of metamorphic relation candidates identified
     gen_situ = [0, 0]  # Counter for the number of successful and failed MR generation attempts
 
-    # Some preprocessings ...
-    os.makedirs(usr_config["output"], exist_ok=True)
-
     # Start metamorphic relation identification loop
     while cnt < max_mrs:
         SAYF("=" * 20 + f" Iteration {cnt + 1} " + "=" * 20 + "\n")
@@ -404,38 +402,16 @@ def main(usr_config: dict):
         # Start a new chat to identify one metamorphic relation candidate
         while index < max_iter:
             # Prompt identification agent to generate a metamorphic relation candidate
-            ACTF("Prompting identification agent to generate/fix a metamorphic relation candidate ...")
-            i = min(index, len(agent_iden.config["prompts"]["user"]) - 1)
-            prompt_template = PromptTemplate.from_file(agent_iden.config["prompts"]["user"][i])
-            usr_prompt = prompt_template.invoke(replacements).to_string()
-            response = agent_iden.instance.invoke(
-                {"messages": [{"role": "user", "content": usr_prompt}]},
-                config=agent_iden.runnable_config,
-            )
+            act = "generate" if index == 0 else "fix"
+            ACTF(f"Prompting identification agent to {act} a metamorphic relation candidate ...")
+            response = identify(agent_iden, index, replacements)
 
             # Extract metamorphic relation candidate
-            candidate = get_first_code_block(response["messages"][-1].content)
+            candidate = get_first_code_block(response)
 
             # Prompt calibration agents to verify the MR candidate
-            # TODO: It can be executed in parallel
             ACTF("Prompting calibration agent(s) to verify the MR candidate ...")
-            cali_res_lst = list()
-            cali_msg_lst = list()
-            for agent in agent_cali:
-                i = min(index, len(agent.config["prompts"]["user"]) - 1)
-                prompt_template = PromptTemplate.from_file(agent.config["prompts"]["user"][i])
-                usr_prompt = prompt_template.partial(**replacements).invoke({"gen_mrc": candidate}).to_string()
-                response = agent.instance.invoke(
-                    {"messages": [{"role": "user", "content": usr_prompt}]},
-                    config=agent.runnable_config,
-                )
-                cali_msg = response["messages"][-1].content
-                cali_res = get_first_code_block(cali_msg)
-                cali_msg_lst.append(cali_msg)
-                if "invalid" in cali_res.lower():
-                    cali_res_lst.append(False)
-                else:
-                    cali_res_lst.append(True)
+            cali_res_lst, cali_msg_lst = calibrate_parallel(agent_cali, index, replacements, candidate)
 
             # Calculate confidence score of calibration
             score = calculate_score(agent_cali, cali_res_lst, calc_method)
@@ -451,6 +427,9 @@ def main(usr_config: dict):
                 gen_succ = True
                 break
             index += 1
+
+        # Identification is done, we can now create the output directory
+        os.makedirs(usr_config["output"], exist_ok=True)
 
         # if generated successfully, append the candidate to the list and save it to the local,
         # otherwise, log the failure and continue to the next iteration
@@ -484,12 +463,8 @@ def main(usr_config: dict):
         log_dict["start time"] = start_time_ms
         log_dict["end time"] = end_time
         log_dict["output dir"] = out_dir
-        with open(os.path.join(out_dir, "iden_status"), mode="w", encoding="utf-8") as f:
-            mx_len = 0
-            for k, _ in log_dict.items():
-                mx_len = max(mx_len, len(k))
-            for k, v in log_dict.items():
-                f.write(f"{k.ljust(mx_len)}: {v}\n")
+        stats_path = os.path.join(out_dir, "iden_stats")
+        write_stats(stats_path, log_dict)
 
         # Log chat history of identification, calibration, and distillation agents to the local
         save_agent_messages(agent_iden, os.path.join(out_dir, "agent_iden_messages.txt"))
@@ -500,6 +475,122 @@ def main(usr_config: dict):
         cnt += 1
 
     OKF(f"We're done here! Identification details: {gen_situ[1]} succ, {gen_situ[0]} failed.")
+
+
+def write_stats(stats_path: str, info_dict: dict):
+    """Write statistics to a file.
+
+    Parameters
+    ----------
+    stats_path : str
+        The path to the output file where statistics will be saved.
+    info_dict : dict
+        Dictionary containing statistics information to be written to the file.
+    """
+    with open(stats_path, mode="w", encoding="utf-8") as f:
+        mx_len = 0
+        for k, _ in info_dict.items():
+            mx_len = max(mx_len, len(k))
+        for k, v in info_dict.items():
+            f.write(f"{k.ljust(mx_len)}: {v}\n")
+
+
+def identify(agent_iden: Agent, index: int, replacements: dict) -> str:
+    """Identify a metamorphic relation candidate using the identification agent.
+
+    Parameters
+    ----------
+    agent_iden : Agent
+        The agent responsible for identifying metamorphic relation candidates.
+    index : int
+        User prompt index, used to select the appropriate prompt template.
+    replacements : dict
+        Dictionary of replacements for the prompt template, containing necessary context and information.
+
+    Returns
+    -------
+    str
+        The content responsed by the agent.
+    """
+    i = min(index, len(agent_iden.config["prompts"]["user"]) - 1)
+    prompt_template = PromptTemplate.from_file(agent_iden.config["prompts"]["user"][i])
+    usr_prompt = prompt_template.invoke(replacements).to_string()
+    response = agent_iden.instance.invoke(
+        {"messages": [{"role": "user", "content": usr_prompt}]},
+        config=agent_iden.runnable_config,
+    )
+    return response["messages"][-1].content
+
+
+def calibrate(agent: Agent, index: int, replacements: dict, candidate: str) -> tuple[bool, str]:
+    """Calibrate the metamorphic relation candidate using a single calibration agent.
+
+    Parameters
+    ----------
+    agent : Agent
+        The calibration agent responsible for verifying the MR candidate.
+    index : int
+        User prompt index, used to select the appropriate prompt template.
+    replacements : dict
+        Dictionary of replacements for the prompt template, containing necessary context and information.
+    candidate : str
+        The metamorphic relation candidate to be verified by the calibration agent.
+
+    Returns
+    -------
+    tuple[bool, str]
+        A tuple containing:
+        - A boolean indicating whether the MR candidate is valid (True) or invalid (False).
+        - The message generated by the calibration agent during the verification process.
+    """
+    i = min(index, len(agent.config["prompts"]["user"]) - 1)
+    prompt_template = PromptTemplate.from_file(agent.config["prompts"]["user"][i])
+    usr_prompt = prompt_template.partial(**replacements).invoke({"gen_mrc": candidate}).to_string()
+    response = agent.instance.invoke(
+        {"messages": [{"role": "user", "content": usr_prompt}]},
+        config=agent.runnable_config,
+    )
+    message = response["messages"][-1].content
+    code_block = get_first_code_block(message)
+    if "invalid" in code_block.lower():
+        result = False
+    else:
+        result = True
+    return result, message
+
+
+def calibrate_parallel(agents: list[Agent], index: int, replacements: dict, candidate: str) -> tuple[list, list]:
+    """Perform calibration of the metamorphic relation candidate using multiple agents.
+
+    Parameters
+    ----------
+    agents : list[Agent]
+        List of calibration agents to verify the MR candidate.
+    index : int
+        User prompt index, used to select the appropriate prompt template.
+    replacements : dict
+        Dictionary of replacements for the prompt template, containing necessary context and information.
+    candidate : str
+        The metamorphic relation candidate to be verified by the calibration agents.
+
+    Returns
+    -------
+    tuple[list, list]
+        A tuple containing two lists:
+        - A list of boolean values indicating whether each calibration agent considers the MR candidate valid.
+        - A list of messages generated by the calibration agents during the verification process.
+    """
+    results = list()
+    messages = list()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(agents)) as executor:
+        futures = {
+            executor.submit(calibrate, agent, index, replacements, candidate): agent for agent in agents
+        }
+        for future in concurrent.futures.as_completed(futures):
+            result, message = future.result()
+            results.append(result)
+            messages.append(message)
+    return results, messages
 
 
 if __name__ == "__main__":

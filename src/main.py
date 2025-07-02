@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-07-01 17:58:09
+LastEditTime : 2025-07-02 09:49:37
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -73,15 +73,13 @@ class Agent:
         )
 
 
-def calculate_score_exp(agents: list[Agent], results: list[bool]) -> float:
+def calculate_score_exp(cali_res_lst: list[tuple[Agent, bool, str]]) -> float:
     """Calculate the confidence score based on exponential decay.
 
     Parameters
     ----------
-    agents : list[Agent]
-        List of agents involved in the calibration process.
-    results : list[bool]
-        List of boolean results from the calibration agents.
+    cali_res_lst : list[tuple[Agent, bool, str]]
+        List of tuples containing calibration agent, verification result of MR candidate, and message.
 
     Returns
     -------
@@ -90,27 +88,26 @@ def calculate_score_exp(agents: list[Agent], results: list[bool]) -> float:
     """
     mol = 0.0
     den = 0.0
-    for i in range(len(agents)):
-        temp = agents[i].config["temperature"]
-        top_p = agents[i].config["top_p"]
+    for i in range(len(cali_res_lst)):
+        agent, result, _ = cali_res_lst[i]
+        temp = agent.config["temperature"]
+        top_p = agent.config["top_p"]
         d = ALPHA * temp + BETA * top_p
         w = math.exp(-d)
-        j = 1 if results[i] else 0
+        j = 1 if result else 0
         mol += w * j
         den += w
     score = mol / den if den > 0 else -1.0
     return score
 
 
-def calculate_score_lin(agents: list[Agent], results: list[bool]) -> float:
+def calculate_score_lin(cali_res_lst: list[tuple[Agent, bool, str]]) -> float:
     """Calculate the confidence score using a linear? method.
 
     Parameters
     ----------
-    agents : list[Agent]
-        List of agents involved in the calibration process.
-    results : list[bool]
-        List of boolean results from the calibration agents.
+    cali_res_lst : list[tuple[Agent, bool, str]]
+        List of tuples containing calibration agent, verification result of MR candidate, and message.
 
     Returns
     -------
@@ -119,27 +116,26 @@ def calculate_score_lin(agents: list[Agent], results: list[bool]) -> float:
     """
     mol = 0.0
     den = 0.0
-    for i in range(len(agents)):
-        temp = agents[i].config["temperature"]
-        top_p = agents[i].config["top_p"]
+    for i in range(len(cali_res_lst)):
+        agent, result, _ = cali_res_lst[i]
+        temp = agent.config["temperature"]
+        top_p = agent.config["top_p"]
         d = ALPHA * temp + BETA * top_p
         w = 1.0 / (d + EPSILON)
-        j = 1 if results[i] else 0
+        j = 1 if result else 0
         mol += w * j
         den += w
     score = mol / den if den > 0 else -1.0
     return score
 
 
-def calculate_score_log(agents: list[Agent], results: list[bool]) -> float:
+def calculate_score_log(cali_res_lst: list[tuple[Agent, bool, str]]) -> float:
     """Calculate the confidence score using a logarithmic method.
 
     Parameters
     ----------
-    agents : list[Agent]
-        List of agents involved in the calibration process.
-    results : list[bool]
-        List of boolean results from the calibration agents.
+    cali_res_lst : list[tuple[Agent, bool, str]]
+        List of tuples containing calibration agent, verification result of MR candidate, and message.
 
     Returns
     -------
@@ -148,27 +144,26 @@ def calculate_score_log(agents: list[Agent], results: list[bool]) -> float:
     """
     mol = 0.0
     den = 0.0
-    for i in range(len(agents)):
-        temp = agents[i].config["temperature"]
-        top_p = agents[i].config["top_p"]
+    for i in range(len(cali_res_lst)):
+        agent, result, _ = cali_res_lst[i]
+        temp = agent.config["temperature"]
+        top_p = agent.config["top_p"]
         d = ALPHA * temp + BETA * top_p
         w = 1.0 / (math.log(d + 1.0) + EPSILON)
-        j = 1 if results[i] else 0
+        j = 1 if result else 0
         mol += w * j
         den += w
     score = mol / den if den > 0 else -1.0
     return score
 
 
-def calculate_score_qua(agents: list[Agent], results: list[bool]) -> float:
+def calculate_score_qua(cali_res_lst: list[tuple[Agent, bool, str]]) -> float:
     """Calculate the confidence score using a quadratic method.
 
     Parameters
     ----------
-    agents : list[Agent]
-        List of agents involved in the calibration process.
-    results : list[bool]
-        List of boolean results from the calibration agents.
+    cali_res_lst : list[tuple[Agent, bool, str]]
+        List of tuples containing calibration agent, verification result of MR candidate, and message.
 
     Returns
     -------
@@ -177,29 +172,28 @@ def calculate_score_qua(agents: list[Agent], results: list[bool]) -> float:
     """
     mol = 0.0
     den = 0.0
-    for i in range(len(agents)):
-        temp = agents[i].config["temperature"]
-        top_p = agents[i].config["top_p"]
+    for i in range(len(cali_res_lst)):
+        agent, result, _ = cali_res_lst[i]
+        temp = agent.config["temperature"]
+        top_p = agent.config["top_p"]
         d = ALPHA * temp + BETA * top_p
         w = max(0, MAX_WEIGHT - GEMMA * d**2)
-        j = 1 if results[i] else 0
+        j = 1 if result else 0
         mol += w * j
         den += w
     score = mol / den if den > 0 else -1.0
     return score
 
 
-def calculate_score(agents: list[Agent], results: list[bool], method: str) -> float:
+def calculate_score(cali_res_lst: list[tuple[Agent, bool, str]], method: str) -> float:
     """Confidence score calculation based on the specified method.
 
     Parameters
     ----------
-    agents : list[Agent]
-        List of agents involved in the calibration process.
-    results : list[bool]
-        List of boolean results from the calibration agents, where True indicates a valid MR candidate and False indicates an invalid one.
+    cali_res_lst : list[tuple[Agent, bool, str]]
+        List of tuples containing calibration agent, verification result of MR candidate, and message.
     method : str
-        The method for confidence score calculation. Options are "EXP", "REC", etc.
+        The method for confidence score calculation. Options are "EXP", "LIN", "LOG, and "QUA".
 
     Returns
     -------
@@ -207,29 +201,25 @@ def calculate_score(agents: list[Agent], results: list[bool], method: str) -> fl
         The calculated confidence score.
     """
     if method == "EXP":
-        return calculate_score_exp(agents, results)
+        return calculate_score_exp(cali_res_lst)
     elif method == "LIN":
-        return calculate_score_lin(agents, results)
+        return calculate_score_lin(cali_res_lst)
     elif method == "LOG":
-        return calculate_score_log(agents, results)
+        return calculate_score_log(cali_res_lst)
     elif method == "QUA":
-        return calculate_score_qua(agents, results)
+        return calculate_score_qua(cali_res_lst)
     return -1.0  # Unlikely to reach here, but just in case
 
 
-def distill(agent: Agent, index: int, messages: list[str], results: list[bool]) -> str:
+def distill(agent: Agent, index: int, cali_res_lst: list[tuple[Agent, bool, str]]) -> str:
     """Distill the error messages from calibration agents to generate a concise error message.
 
     Parameters
     ----------
-    agent : Agent
-        The agent responsible for distillation.
     index : int
-        User prompt index.
-    messages : list[str]
-        List of error messages from calibration agents.
-    results : list[bool]
-        List of calibration results of calibration agents.
+        User prompt index, used to select the appropriate prompt template.
+    cali_res_lst : list[tuple[Agent, bool, str]]
+        List of tuples containing calibration agent, verification result of MR candidate, and message.
 
     Returns
     -------
@@ -238,10 +228,11 @@ def distill(agent: Agent, index: int, messages: list[str], results: list[bool]) 
     """
     # Get error messages generated by calibration agents
     error_messages = str()
-    for i in range(len(messages)):
-        if results[i]:
+    for i in range(len(cali_res_lst)):
+        _, result, message = cali_res_lst[i]
+        if result:
             continue
-        error_messages += f"Agent {i + 1} reported an error:\n\n{messages[i]}\n\n"
+        error_messages += f"Agent {i + 1} reported an error:\n\n{message}\n\n"
     idx = min(index, len(agent.config["prompts"]["user"]) - 1)
     prompt_template = PromptTemplate.from_file(agent.config["prompts"]["user"][idx])
     usr_prompt = prompt_template.invoke({"error_messages": error_messages}).to_string()
@@ -411,16 +402,16 @@ def main(usr_config: dict):
 
             # Prompt calibration agents to verify the MR candidate
             ACTF("Prompting calibration agent(s) to verify the MR candidate ...")
-            cali_res_lst, cali_msg_lst = calibrate_parallel(agent_cali, index, replacements, candidate)
+            cali_res_lst = calibrate_parallel(agent_cali, index, replacements, candidate)
 
             # Calculate confidence score of calibration
-            score = calculate_score(agent_cali, cali_res_lst, calc_method)
+            score = calculate_score(cali_res_lst, calc_method)
 
             # If confidence score less than threshold, collect & distill the error messages,
             # else, update existing MR candidates and open a new chat to generate a new MR candidate
             if score < score_threshold:
                 WARNF(f"Confidence score is lower than threshold ({score} < {score_threshold}), distilling error messages ...")
-                distn_err_msg = distill(agent_distn, index, cali_msg_lst, cali_res_lst)
+                distn_err_msg = distill(agent_distn, index, cali_res_lst)
                 replacements["distn_error_messages"] = distn_err_msg
             else:
                 OKF(f"Confidence score is satisfied ({score} >= {score_threshold}), adding to candidate list ...")
@@ -522,7 +513,7 @@ def identify(agent_iden: Agent, index: int, replacements: dict) -> str:
     return response["messages"][-1].content
 
 
-def calibrate(agent: Agent, index: int, replacements: dict, candidate: str) -> tuple[bool, str]:
+def calibrate(agent: Agent, index: int, replacements: dict, candidate: str) -> tuple[Agent, bool, str]:
     """Calibrate the metamorphic relation candidate using a single calibration agent.
 
     Parameters
@@ -538,8 +529,9 @@ def calibrate(agent: Agent, index: int, replacements: dict, candidate: str) -> t
 
     Returns
     -------
-    tuple[bool, str]
+    tuple[Agent, bool, str]
         A tuple containing:
+        - The calibration agent that performed the verification.
         - A boolean indicating whether the MR candidate is valid (True) or invalid (False).
         - The message generated by the calibration agent during the verification process.
     """
@@ -556,10 +548,10 @@ def calibrate(agent: Agent, index: int, replacements: dict, candidate: str) -> t
         result = False
     else:
         result = True
-    return result, message
+    return agent, result, message
 
 
-def calibrate_parallel(agents: list[Agent], index: int, replacements: dict, candidate: str) -> tuple[list, list]:
+def calibrate_parallel(agents: list[Agent], index: int, replacements: dict, candidate: str) -> list[tuple[Agent, bool, str]]:
     """Perform calibration of the metamorphic relation candidate using multiple agents.
 
     Parameters
@@ -575,22 +567,21 @@ def calibrate_parallel(agents: list[Agent], index: int, replacements: dict, cand
 
     Returns
     -------
-    tuple[list, list]
-        A tuple containing two lists:
-        - A list of boolean values indicating whether each calibration agent considers the MR candidate valid.
-        - A list of messages generated by the calibration agents during the verification process.
+    list[tuple[Agent, bool, str]]
+        A list of tuples, each containing:
+        - The calibration agent that performed the verification.
+        - A boolean indicating whether the MR candidate is valid (True) or invalid (False).
+        - The message generated by the calibration agent during the verification process.
     """
-    results = list()
-    messages = list()
+    cali_res_lst = list()
     with concurrent.futures.ThreadPoolExecutor(max_workers=len(agents)) as executor:
         futures = {
             executor.submit(calibrate, agent, index, replacements, candidate): agent for agent in agents
         }
         for future in concurrent.futures.as_completed(futures):
-            result, message = future.result()
-            results.append(result)
-            messages.append(message)
-    return results, messages
+            cali_res = future.result()
+            cali_res_lst.append(cali_res)
+    return cali_res_lst
 
 
 if __name__ == "__main__":

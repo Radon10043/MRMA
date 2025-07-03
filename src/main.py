@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-07-03 21:16:35
+LastEditTime : 2025-07-03 21:28:05
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -386,8 +386,15 @@ def main(usr_config: dict):
         agent = Agent(cfg, [], replacements)
         agent_cali.append(agent)
 
+    # candidates store the existing metamorphic relation candidates or existing metamorphic relations
+    candidates = list()
+    if usr_config.get("existing_mrs") is not None:
+        for f in usr_config["existing_mrs"]:
+            lang = os.path.splitext(f)[-1].strip(".")
+            mr = Path(f).read_text(encoding="utf-8")
+            candidates.append(f"```{lang}\n{mr}\n```")
+
     # Prepare some variables for the identification process
-    candidates = list()  # List to store identified metamorphic relation candidates
     cnt = 0  # Counter for the number of metamorphic relation candidates identified
     gen_situ = [0, 0]  # Counter for the number of successful and failed MR generation attempts
 

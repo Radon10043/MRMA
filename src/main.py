@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-07-03 21:28:05
+LastEditTime : 2025-07-03 21:44:14
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -60,7 +60,7 @@ class Agent:
             model=config.get("model"),
             temperature=config.get("temperature", 1.0),
             model_provider="openai",
-            top_p=config.get("top_p", 0.9),
+            top_p=config.get("top_p", 1.0),
         )
         prompt_template = PromptTemplate.from_file(config["prompts"]["system"])
         self.sys_prompt = prompt_template.invoke(replacements).to_string()

@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-07-02 09:49:37
+LastEditTime : 2025-07-03 21:16:35
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -185,6 +185,29 @@ def calculate_score_qua(cali_res_lst: list[tuple[Agent, bool, str]]) -> float:
     return score
 
 
+def calculate_score_van(cali_res_lst: list[tuple[Agent, bool, str]]) -> float:
+    """Calculate the confidence score using a vanilla method.
+
+    Parameters
+    ----------
+    cali_res_lst : list[tuple[Agent, bool, str]]
+        List of tuples containing calibration agent, verification result of MR candidate, and message.
+
+    Returns
+    -------
+    float
+        The calculated confidence score.
+    """
+    mol = 0
+    den = 0
+    for i in range(len(cali_res_lst)):
+        _, result, _ = cali_res_lst[i]
+        mol += 1 if result else 0
+        den += 1
+    score = mol / den
+    return score
+
+
 def calculate_score(cali_res_lst: list[tuple[Agent, bool, str]], method: str) -> float:
     """Confidence score calculation based on the specified method.
 
@@ -208,6 +231,8 @@ def calculate_score(cali_res_lst: list[tuple[Agent, bool, str]], method: str) ->
         return calculate_score_log(cali_res_lst)
     elif method == "QUA":
         return calculate_score_qua(cali_res_lst)
+    elif method == "VAN":
+        return calculate_score_van(cali_res_lst)
     return -1.0  # Unlikely to reach here, but just in case
 
 
@@ -588,7 +613,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="MR Identification via LLM, CoT, and RAG")
     parser.add_argument("--config", type=str, required=True, help="Path to the configuration file")
     args = parser.parse_args()
-    usr_cfg = dict()
-    with open(args.config, "r", encoding="utf-8") as f:
-        usr_cfg = json.load(f)
+    cfg_txt = Path(args.config).read_text(encoding="utf-8")
+    usr_cfg = json.loads(os.path.expandvars(cfg_txt))
     main(usr_cfg)

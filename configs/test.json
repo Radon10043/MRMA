@@ -3,12 +3,12 @@
         "model": "gpt-4o-mini",
         "temperature": 1.0,
         "top_p": 0.9,
-        "external_corpus": "/vol/MR-CoT-RAG/data/corpus/Bsearch2.md",
+        "external_corpus": "$PROJ/data/corpus/Bsearch2.md",
         "prompts": {
-            "system": "/vol/MR-CoT-RAG/data/prompts/iden/system.md",
+            "system": "$PROJ/data/prompts/iden/system.md",
             "user": [
-                "/vol/MR-CoT-RAG/data/prompts/iden/user1.md",
-                "/vol/MR-CoT-RAG/data/prompts/iden/user2.md"
+                "$PROJ/data/prompts/iden/user1.md",
+                "$PROJ/data/prompts/iden/user2.md"
             ]
         }
     },
@@ -17,9 +17,9 @@
         "temperature": 1.0,
         "top_p": 0.9,
         "prompts": {
-            "system": "/vol/MR-CoT-RAG/data/prompts/distn/system.md",
+            "system": "$PROJ/data/prompts/distn/system.md",
             "user": [
-                "/vol/MR-CoT-RAG/data/prompts/distn/user1.md"
+                "$PROJ/data/prompts/distn/user1.md"
             ]
         }
     },
@@ -29,10 +29,10 @@
             "temperature": 1.0,
             "top_p": 0.9,
             "prompts": {
-                "system": "/vol/MR-CoT-RAG/data/prompts/cali/system.md",
+                "system": "$PROJ/data/prompts/cali/system.md",
                 "user": [
-                    "/vol/MR-CoT-RAG/data/prompts/cali/user1.md",
-                    "/vol/MR-CoT-RAG/data/prompts/cali/user2.md"
+                    "$PROJ/data/prompts/cali/user1.md",
+                    "$PROJ/data/prompts/cali/user2.md"
                 ]
             }
         },
@@ -41,23 +41,23 @@
             "temperature": 1.0,
             "top_p": 0.9,
             "prompts": {
-                "system": "/vol/MR-CoT-RAG/data/prompts/cali/system.md",
+                "system": "$PROJ/data/prompts/cali/system.md",
                 "user": [
-                    "/vol/MR-CoT-RAG/data/prompts/cali/user1.md",
-                    "/vol/MR-CoT-RAG/data/prompts/cali/user2.md"
+                    "$PROJ/data/prompts/cali/user1.md",
+                    "$PROJ/data/prompts/cali/user2.md"
                 ]
             }
         }
     ],
     "replacements": {
         "sut_name": "Binary Search Algorithm",
-        "specification": "/vol/MR-CoT-RAG/data/specs/Bsearch2.md",
-        "example_mr": "/vol/MR-CoT-RAG/data/example-MRs/Bsearch2.md",
-        "example_analysis": "/vol/MR-CoT-RAG/data/example-analysis/Bsearch2.md"
+        "specification": "$PROJ/data/specs/Bsearch2.md",
+        "example_mr": "$PROJ/data/example-MRs/Bsearch2.md",
+        "example_analysis": "$PROJ/data/example-analysis/Bsearch2.md"
     },
     "score_calc": "EXP",
     "score_threshold": 0.6,
     "max_MRs": 2,
     "max_iter": 10,
-    "output": "/vol/MR-CoT-RAG/workdir/debug"
+    "output": "$PROJ/workdir/debug"
 }

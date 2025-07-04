@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-07-03 21:44:14
+LastEditTime : 2025-07-04 11:30:48
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -61,6 +61,8 @@ class Agent:
             temperature=config.get("temperature", 1.0),
             model_provider="openai",
             top_p=config.get("top_p", 1.0),
+            base_url=config.get("base_url", os.path.expandvars("$OPENAI_API_BASE")),
+            api_key=config.get("api_key", os.getenv("OPENAI_API_KEY")),
         )
         prompt_template = PromptTemplate.from_file(config["prompts"]["system"])
         self.sys_prompt = prompt_template.invoke(replacements).to_string()
@@ -406,7 +408,6 @@ def main(usr_config: dict):
         gen_succ = False
         start_time_ms = get_cur_time_ms()
         out_dir = os.path.join(usr_config["output"], str(start_time_ms))
-        os.mkdir(out_dir)
 
         # Initialize identification agent with existing MR candidates
         prompt_prevent_dup = str()
@@ -453,6 +454,7 @@ def main(usr_config: dict):
 
         # Identification is done, we can now create the output directory
         os.makedirs(usr_config["output"], exist_ok=True)
+        os.mkdir(out_dir)
 
         # if generated successfully, append the candidate to the list and save it to the local,
         # otherwise, log the failure and continue to the next iteration

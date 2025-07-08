@@ -1,5 +1,39 @@
-# Created by https://www.toptal.com/developers/gitignore/api/python
-# Edit at https://www.toptal.com/developers/gitignore?templates=python
+# Created by https://www.toptal.com/developers/gitignore/api/python,c++
+# Edit at https://www.toptal.com/developers/gitignore?templates=python,c++
+
+### C++ ###
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
@@ -8,7 +42,6 @@ __pycache__/
 *$py.class
 
 # C extensions
-*.so
 
 # Distribution / packaging
 .Python
@@ -173,9 +206,11 @@ poetry.toml
 # LSP config files
 pyrightconfig.json
 
-# End of https://www.toptal.com/developers/gitignore/api/python
+# End of https://www.toptal.com/developers/gitignore/api/python,c++
 
 ### Custom ###
 .vscode/*
 !.vscode/settings.json
 workdir/*
+software-under-test/*
+bin/*

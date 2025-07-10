@@ -2,13 +2,19 @@
 Author       : Radon
 Date         : 2025-06-27 16:42:43
 LastEditors  : Radon
-LastEditTime : 2025-07-01 14:19:09
+LastEditTime : 2025-07-10 20:51:16
 Description  : Utility functions
 """
 
+import os
 import time
 
 import marko
+from langchain.chat_models import init_chat_model
+from langchain_core.prompts import PromptTemplate
+from langchain_core.runnables import RunnableConfig
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.prebuilt import create_react_agent
 from marko.md_renderer import MarkdownRenderer
 
 
@@ -69,6 +75,42 @@ def PFATAL(msg: str):
     exit(1)
 
 
+class Agent:
+    """Agent class for managing a chat model and tools."""
+
+    def __init__(self, config: dict, tools: list, replacements: dict = {}):
+        """Initialize an agent with a chat model and tools.
+
+        Parameters
+        ----------
+        config : dict
+            Configuration dictionary.
+        tools : list
+            List of tools to be used by the agent.
+        replacements : dict, optional
+            Dictionary of replacements for the prompt template, by default an empty dict
+        """
+        self.config = config
+        self.runnable_config = RunnableConfig({"configurable": {"thread_id": "foo"}})  # Placeholder for thread ID
+        self.llm = init_chat_model(
+            model=config.get("model"),
+            temperature=config.get("temperature", 1.0),
+            model_provider="openai",
+            top_p=config.get("top_p", 1.0),
+            base_url=config.get("base_url", os.getenv("OPENAI_API_BASE")),
+            api_key=config.get("api_key", os.getenv("OPENAI_API_KEY")),
+        )
+        prompt_template = PromptTemplate.from_file(config["prompts"]["system"])
+        self.sys_prompt = prompt_template.invoke(replacements).to_string()
+        memory = MemorySaver()
+        self.instance = create_react_agent(
+            model=self.llm,
+            tools=tools,
+            checkpointer=memory,
+            prompt=self.sys_prompt,
+        )
+
+
 ###############################
 ### Miscellaneous functions ###
 ###############################
@@ -113,3 +155,22 @@ def get_cur_time_ms() -> int:
     now = time.time_ns()
     ms = now // 1_000_000
     return ms
+
+
+def save_agent_messages(agent: Agent, out_path: str):
+    """Save the chat history of an agent to a file.
+
+    Parameters
+    ----------
+    agent : Agent
+        The agent whose chat history is to be saved.
+    out_path : str
+        The path to the output file where the chat history will be saved.
+    """
+    state = agent.instance.get_state(config=agent.runnable_config).values
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(" System Prompt ".center(81, "=") + f"\n\n{agent.sys_prompt}\n\n")
+        if not "messages" in state:
+            return
+        for message in state["messages"]:
+            f.write(message.pretty_repr() + "\n")

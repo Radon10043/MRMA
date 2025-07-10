@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-07-04 11:30:48
+LastEditTime : 2025-07-10 20:51:11
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -15,7 +15,6 @@ import uuid
 from pathlib import Path
 
 from dotenv import load_dotenv
-from langchain.chat_models import init_chat_model
 from langchain_community.document_loaders import TextLoader
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnableConfig
@@ -23,56 +22,19 @@ from langchain_core.tools import tool
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langgraph.checkpoint.memory import MemorySaver
-from langgraph.prebuilt import create_react_agent
 
 from utils import *
 
 # fmt:off
 ########## GLOBAL VARIABLES ##########
 VECTOR_STORE = None     # Vector store for external corpus
-ALPHA = 1.0             # Factor of temperature
-BETA = 0.5              # Factor of top_p
-EPSILON = 0.1           # A small constant to avoid division by zero
-MAX_WEIGHT = 10.0       # Maximum weight for quadratic score calculation
-GEMMA = 8.0             # Factor of (ALPHA*temperature + BETA*top_p)^2 in quadratic score calculation
+ALPHA        = 1.0      # Factor of temperature
+BETA         = 0.5      # Factor of top_p
+EPSILON      = 0.1      # A small constant to avoid division by zero
+MAX_WEIGHT   = 10.0     # Maximum weight for quadratic score calculation
+GEMMA        = 8.0      # Factor of (ALPHA*temperature + BETA*top_p)^2 in quadratic score calculation
 ######################################
 # fmt:on
-
-
-class Agent:
-
-    def __init__(self, config: dict, tools: list, replacements: dict = {}):
-        """Initialize an agent with a chat model and tools.
-
-        Parameters
-        ----------
-        config : dict
-            Configuration dictionary.
-        tools : list
-            List of tools to be used by the agent.
-        replacements : dict, optional
-            Dictionary of replacements for the prompt template, by default an empty dict
-        """
-        self.config = config
-        self.runnable_config = RunnableConfig({"configurable": {"thread_id": "foo"}})  # Placeholder for thread ID
-        self.llm = init_chat_model(
-            model=config.get("model"),
-            temperature=config.get("temperature", 1.0),
-            model_provider="openai",
-            top_p=config.get("top_p", 1.0),
-            base_url=config.get("base_url", os.path.expandvars("$OPENAI_API_BASE")),
-            api_key=config.get("api_key", os.getenv("OPENAI_API_KEY")),
-        )
-        prompt_template = PromptTemplate.from_file(config["prompts"]["system"])
-        self.sys_prompt = prompt_template.invoke(replacements).to_string()
-        memory = MemorySaver()
-        self.instance = create_react_agent(
-            model=self.llm,
-            tools=tools,
-            checkpointer=memory,
-            prompt=self.sys_prompt,
-        )
 
 
 def calculate_score_exp(cali_res_lst: list[tuple[Agent, bool, str]]) -> float:
@@ -330,25 +292,6 @@ def save_mr_candidate(candidate: str, out_path: str):
     with open(out_path, mode="w", encoding="utf-8") as f:
         code = candidate.split("\n")[1:-1]
         f.write("\n".join(code))
-
-
-def save_agent_messages(agent: Agent, out_path: str):
-    """Save the chat history of an agent to a file.
-
-    Parameters
-    ----------
-    agent : Agent
-        The agent whose chat history is to be saved.
-    out_path : str
-        The path to the output file where the chat history will be saved.
-    """
-    state = agent.instance.get_state(config=agent.runnable_config).values
-    with open(out_path, "w", encoding="utf-8") as f:
-        f.write(" System Prompt ".center(81, "=") + f"\n\n{agent.sys_prompt}\n\n")
-        if not "messages" in state:
-            return
-        for message in state["messages"]:
-            f.write(message.pretty_repr() + "\n")
 
 
 def main(usr_config: dict):
@@ -609,9 +552,7 @@ def calibrate_parallel(agents: list[Agent], index: int, replacements: dict, cand
     """
     cali_res_lst = list()
     with concurrent.futures.ThreadPoolExecutor(max_workers=len(agents)) as executor:
-        futures = {
-            executor.submit(calibrate, agent, index, replacements, candidate): agent for agent in agents
-        }
+        futures = {executor.submit(calibrate, agent, index, replacements, candidate): agent for agent in agents}
         for future in concurrent.futures.as_completed(futures):
             cali_res = future.result()
             cali_res_lst.append(cali_res)

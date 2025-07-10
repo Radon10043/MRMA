@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-07-10 17:43:16
 LastEditors  : Radon
-LastEditTime : 2025-07-10 22:12:57
+LastEditTime : 2025-07-10 16:12:23
 Description  : Generate test driver for encoded-MRCs
 """
 
@@ -38,8 +38,8 @@ def build_cpp(code: str, config: dict) -> tuple[bool, str]:
         "test_driver",
         "-isystem",
         "/home/tools/googletest-1.14.0/googletest/include",
-        "/home/tools/googletest-1.14.0/lib/libgtest.a",
-        "/home/tools/googletest-1.14.0/lib/libgtest_main.a",
+        "/home/tools/googletest-1.14.0/build/lib/libgtest.a",
+        "/home/tools/googletest-1.14.0/build/lib/libgtest_main.a",
     ]
     result = subprocess.run(
         cmd,
@@ -80,7 +80,7 @@ def main(user_config: dict):
 
     # Start prompting the agent to generate complete code
     while index < max_iter and not gen_succ:
-        i = min(index, max_iter)
+        i = min(index, len(usr_pts) - 1)  # Use the last prompt if index exceeds available prompts
         pt = PromptTemplate.from_file(usr_pts[i])
         prompt = pt.invoke(replacements).to_string()
         response = agent.instance.invoke(
@@ -88,7 +88,7 @@ def main(user_config: dict):
             config=agent.runnable_config,
         )
         compl_code = get_first_code_block(response["messages"][-1].content)
-        compl_code = compl_code.removeprefix(f"```{ext}\n").removesuffix("```")
+        compl_code = compl_code.removeprefix(f"```{ext}\n").rstrip("`\n")
         gen_succ, error_messages = build_dict[ext](compl_code, user_config["build"])
         replacements["error_messages"] = error_messages
         index += 1

@@ -17,6 +17,6 @@ RUN apt update && \
     wget https://github.com/google/googletest/archive/refs/tags/v1.14.0.tar.gz && \
     tar zxvf v1.14.0.tar.gz && pushd googletest-1.14.0 && \
     mkdir build && pushd build && \
-    cmake .. && make && \
+    cmake .. && make && make install && \
     popd && popd && rm v1.14.0.tar.gz && popd && \
     npm install -g @google/gemini-cli

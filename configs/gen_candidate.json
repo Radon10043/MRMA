@@ -1,0 +1,63 @@
+{
+    "agent_iden": {
+        "model": "gpt-4o-mini",
+        "temperature": 1.0,
+        "top_p": 0.9,
+        "external_corpus": "$PROJECT/data/corpus/Bsearch2.md",
+        "prompts": {
+            "system": "$PROJECT/data/prompts/iden/system.md",
+            "user": [
+                "$PROJECT/data/prompts/iden/user1.md",
+                "$PROJECT/data/prompts/iden/user2.md"
+            ]
+        }
+    },
+    "agent_distn": {
+        "model": "gpt-4o-mini",
+        "temperature": 1.0,
+        "top_p": 0.9,
+        "prompts": {
+            "system": "$PROJECT/data/prompts/distn/system.md",
+            "user": [
+                "$PROJECT/data/prompts/distn/user1.md"
+            ]
+        }
+    },
+    "agent_cali": [
+        {
+            "model": "gemini-2.5-pro",
+            "temperature": 1.0,
+            "top_p": 0.9,
+            "prompts": {
+                "system": "$PROJECT/data/prompts/cali/system.md",
+                "user": [
+                    "$PROJECT/data/prompts/cali/user1.md",
+                    "$PROJECT/data/prompts/cali/user2.md"
+                ]
+            }
+        },
+        {
+            "model": "o4-mini",
+            "temperature": 1.0,
+            "top_p": 0.9,
+            "prompts": {
+                "system": "$PROJECT/data/prompts/cali/system.md",
+                "user": [
+                    "$PROJECT/data/prompts/cali/user1.md",
+                    "$PROJECT/data/prompts/cali/user2.md"
+                ]
+            }
+        }
+    ],
+    "replacements": {
+        "sut_name": "Binary Search Algorithm",
+        "specification": "$PROJECT/data/specs/Bsearch2.md",
+        "example_mr": "$PROJECT/data/example-MRs/Bsearch2.md",
+        "example_analysis": "$PROJECT/data/example-analysis/Bsearch2.md"
+    },
+    "score_calc": "EXP",
+    "score_threshold": 0.6,
+    "max_MRs": 2,
+    "max_iter": 10,
+    "output": "$PROJECT/workdir/debug"
+}

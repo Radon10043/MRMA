@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-07-10 17:43:16
 LastEditors  : Radon
-LastEditTime : 2025-07-11 14:29:33
+LastEditTime : 2025-07-11 16:53:05
 Description  : Generate test driver for encoded-MRCs
 """
 
@@ -62,6 +62,7 @@ def build_cpp(code: str) -> tuple[bool, str]:
         cxx,
         filepath,
         "-std=c++17",
+        "-pthread",
         "-Wall",
         "-Wextra",
         "-Werror",

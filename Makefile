@@ -1,24 +1,28 @@
+include .env
+export
+
+# cpp compile configurations
 CC := gcc
 CXX := g++
 CXXFLAGS := -std=c++17 -pthread -Wall -Wextra -Werror
-GTEST_DIR := /home/tools/googletest-1.14.0
-BIN_DIR := bin
 INCLUDES := -isystem $(GTEST_DIR)/googletest/include
-LIBS := $(GTEST_DIR)/lib/libgtest.a $(GTEST_DIR)/lib/libgtest_main.a
-SRC :=
+LIBS := $(GTEST_DIR)/build/lib/libgtest.a $(GTEST_DIR)/build/lib/libgtest_main.a
 
-.PHONY: all debug clean
+SRC ?=
+BIN := $(basename $(SRC)).out
+EXT := $(suffix $(SRC))
 
-all: prepare debug
+.PHONY: all cpp clean
 
-prepare:
-	ifeq ($(SRC),)
-		$(error You need specify SRC, e.g. make SRC=/path/to/a.cpp)
-	endif
-	@mkdir -p $(BIN_DIR)
+all: $(EXT)
 
-debug:
-	$(CXX) $(SRC) $(CXXFLAGS) $(INCLUDES) $(LIBS) -o $(BIN_DIR)/run_tests
+.cpp:
+ifeq ($(origin SRC), command line)
+	$(info SRC=$(SRC))
+else
+	$(error SRC is not set, please provide a source file to compile (e.g. make SRC=your_file.cpp))
+endif
+	$(CXX) $(SRC) $(CXXFLAGS) -o $(BIN) $(INCLUDES) $(LIBS)
 
 clean:
 	rm -rf $(BIN_DIR)/

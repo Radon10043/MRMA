@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-07-10 20:51:11
+LastEditTime : 2025-07-11 14:47:42
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -302,8 +302,6 @@ def main(usr_config: dict):
     usr_cfg : dict
         User configuration dictionary containing model parameters and other settings.
     """
-    load_dotenv()  # Load environment variables from .env file
-
     # Split user configs
     config_iden = usr_config["agent_iden"]
     config_cali = usr_config["agent_cali"]
@@ -563,6 +561,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="MR Identification via LLM, CoT, and RAG")
     parser.add_argument("--config", type=str, required=True, help="Path to the configuration file")
     args = parser.parse_args()
+    load_dotenv()
     cfg_txt = Path(args.config).read_text(encoding="utf-8")
     usr_cfg = json.loads(os.path.expandvars(cfg_txt))
     main(usr_cfg)

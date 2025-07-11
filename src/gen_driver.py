@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-07-10 17:43:16
 LastEditors  : Radon
-LastEditTime : 2025-07-11 14:15:00
+LastEditTime : 2025-07-11 14:29:33
 Description  : Generate test driver for encoded-MRCs
 """
 
@@ -91,8 +91,6 @@ def main(user_config: dict):
         A dictionary containing user configuration, including the agent configuration,
         candidate file path, build settings, etc.
     """
-    load_dotenv()  # Load environment variables from .env file
-
     ACTF("Initializing driver generation agent ...")
     replacements = user_config.get("replacements", {})
     config_agent = user_config["agent"]
@@ -156,6 +154,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate test driver for encoded-MRCs")
     parser.add_argument("--config", type=str, required=True, help="Path to the configuration file")
     args = parser.parse_args()
+    load_dotenv()
     cfg_text = Path(args.config).read_text(encoding="utf-8")
     usr_cfg = json.loads(os.path.expandvars(cfg_text))
     main(usr_cfg)

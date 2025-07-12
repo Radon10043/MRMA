@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-27 16:42:43
 LastEditors  : Radon
-LastEditTime : 2025-07-10 20:51:16
+LastEditTime : 2025-07-12 14:31:32
 Description  : Utility functions
 """
 
@@ -174,3 +174,25 @@ def save_agent_messages(agent: Agent, out_path: str):
             return
         for message in state["messages"]:
             f.write(message.pretty_repr() + "\n")
+
+
+def remove_code_fences(code: str) -> str:
+    """Remove code fences from a string.
+
+    Parameters
+    ----------
+    code : str
+        The string containing code with fences.
+
+    Returns
+    -------
+    str
+        The string with code fences removed.
+    """
+    code_lst = code.split("\n")
+    s, e = 0, len(code_lst) - 1
+    while s < len(code_lst) and not code_lst[s].startswith("```"):
+        s += 1
+    while e >= 0 and not code_lst[e].startswith("```"):
+        e -= 1
+    return "\n".join(code_lst[s + 1 : e]).strip() if s < e else code

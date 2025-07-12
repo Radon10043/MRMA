@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-07-10 17:43:16
 LastEditors  : Radon
-LastEditTime : 2025-07-12 06:18:41
+LastEditTime : 2025-07-12 14:45:43
 Description  : Generate test driver for encoded-MRCs
 """
 
@@ -47,6 +47,7 @@ class Driver:
         code = prefix + "\n" + code
         code = f"```{self.ext}\n{code}\n```"  # Wrap code in fenced code block with language tag
         self.replacements["candidate"] = code
+        self.replacements["additional_reqs"] = str()
 
     def update_replacements(self, key: str, value: str):
         """Update a specific key in the replacements dictionary with a new value.
@@ -209,6 +210,39 @@ class DriverJava(Driver):
         Path(filepath).write_text(code, encoding="utf-8")
 
 
+class DriverPython(Driver):
+    """Driver class for Python test driver generation."""
+
+    def preprocessing(self):
+        """Perform preprocessing with additional requirements for Python."""
+        super().preprocessing()
+        additional_reqs = str()
+        additional_reqs += "- Please implement the main function to start the testing.\n"
+        self.replacements["additional_reqs"] = additional_reqs
+
+    def build(self, code: str) -> tuple[bool, str]:
+        """Build a Python test driver from the provided code.
+
+        Parameters
+        ----------
+        code : str
+            The Python code to be compiled as a test driver.
+
+        Returns
+        -------
+        tuple[bool, str]
+            A tuple containing a boolean indicating success or failure, and a string with error messages if any.
+        """
+        try:
+            compile(code, "<string>", "exec")
+        except SyntaxError as e:
+            err = f"SyntaxError: {e.msg} at line {e.lineno}, column {e.offset}"
+            return False, err
+        except BaseException as e:
+            FATAL(f"Unexpected error during Python code compilation: {e}")
+        return True, str()
+
+
 def main(user_config: dict):
     """Generate a test driver based on the provided user configuration.
 
@@ -226,8 +260,10 @@ def main(user_config: dict):
         driver = DriverCpp(user_config)
     elif ext == "java":
         driver = DriverJava(user_config)
+    elif ext == "py":
+        driver = DriverPython(user_config)
     else:
-        raise ValueError(f"Unsupported file extension: {ext}")
+        raise ValueError(f"Unsupported file extension: {ext}.")
     driver.preprocessing()
 
     # Init an driver generation agent and assign it an unique thread ID for chating iteratively
@@ -253,7 +289,7 @@ def main(user_config: dict):
             config=agent.runnable_config,
         )
         compl_code = get_first_code_block(response["messages"][-1].content)
-        compl_code = compl_code.removeprefix(f"```{ext}\n").rstrip("`\n")
+        compl_code = remove_code_fences(compl_code)
         gen_succ, error_messages = driver.build(compl_code)
         driver.update_replacements("error_messages", error_messages)
         index += 1
@@ -269,7 +305,7 @@ def main(user_config: dict):
         BADF(f"Failed to generate a valid test driver after {max_iter} iterations.")
 
     # Save the agent's messages to a file
-    save_agent_messages(agent, os.path.join(out_dir, "agent_test_messages.txt"))
+    save_agent_messages(agent, os.path.join(out_dir, "agent_driver_messages.txt"))
 
     OKF("We're done here!")
 

@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-07-12 05:46:51
 LastEditors  : Radon
-LastEditTime : 2025-07-12 05:51:18
+LastEditTime : 2025-07-12 14:40:03
 Description  : Just for debugging
 """
 
@@ -20,4 +20,18 @@ public class DriverTest {
         System.out.println("Hello world!");
     }
 }
+"""
+
+FAKE_PYTHON = """
+import unittest
+import os, subprocess, time
+
+from parameterized import parameterized
+
+class TestingClass(unittest.TestCase):
+    def test0(self, tc: str):
+        print("Hello world!")
+
+if __name__ == "__main__":
+    unittest.main()
 """

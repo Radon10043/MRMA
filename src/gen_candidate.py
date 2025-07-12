@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-07-11 13:50:38
+LastEditTime : 2025-07-12 14:32:42
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -289,15 +289,8 @@ def save_mr_candidate(candidate: str, out_path: str):
     out_path : str
         The path to the output file where the candidate will be saved.
     """
-    cand_lst = candidate.split("\n")
-    s, e = 0, len(cand_lst) - 1
-    while s < len(cand_lst) and not cand_lst[s].startswith("```"):
-        s += 1
-    while e >= 0 and not cand_lst[e].startswith("```"):
-        e -= 1
-    with open(out_path, mode="w", encoding="utf-8") as f:
-        code = candidate.split("\n")[s + 1 : e]
-        f.write("\n".join(code))
+    code = remove_code_fences(candidate)
+    Path(out_path).write_text(code, encoding="utf-8")
 
 
 def main(usr_config: dict):

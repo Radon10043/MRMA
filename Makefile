@@ -22,9 +22,8 @@ JAVAFLAGS := -cp "$(JAVAPROJ)/bin:$(JAVAPROJ)/lib/*" org.junit.platform.console.
 JAVACFLAGS := -d $(JAVAPROJ)/bin -cp "$(JAVAPROJ)/lib/*"
 JAVASRC := $(JAVAPROJ)/test/DriverTest.java
 
-# javac -d bin -cp "lib/*" test/FastJsonExampleTest.java test/testcaseGenerator.java
-# java -cp "bin:lib/*" org.junit.platform.console.ConsoleLauncher --scan-class-path
-
+# python configurations
+PYTHON ?=
 
 .PHONY: all cpp clean
 
@@ -39,6 +38,9 @@ ifneq ($(origin JAVAPROJ), command line)
 	$(error JAVAPROJ is not set, please provide a source file to compile (e.g. make JAVAPROJ=./test_driver_java build_java))
 endif
 	$(JAVAC) $(JAVACFLAGS) $(JAVASRC)
+
+build_python:
+	@echo "No need to build Python program, just run 'make PYTHON=your_file.py run_python'"
 
 run_cpp:
 ifneq ($(origin BIN), command line)
@@ -78,6 +80,32 @@ endif
 	@for i in $$(seq $(REP)); do \
 		echo -n "Running iteration $$i ..."; \
 		if timeout $(TIMEOUT) $(JAVA) $(JAVAFLAGS) > /dev/null 2>&1; then \
+			echo " OK"; \
+		else \
+			exit_code=$$?; \
+			if [ $$exit_code -eq 124 ]; then \
+				echo " TIMEOUT! Stopping execution."; \
+			else \
+				echo " FAILED! Stopping execution."; \
+			fi; \
+			exit 1; \
+		fi; \
+	done
+	@echo "-------------------------------"
+	@echo "Successfully completed all $(REP) runs."
+
+run_python:
+ifneq ($(origin PYTHON), command line)
+	$(error PYTHON is not set, please provide a source file to run (e.g. make PYTHON=your_file.py run_python))
+endif
+	@echo "--- Starting Repetitive Run ---"
+	@echo "Python File: $(PYTHON)"
+	@echo "Repetitions: $(REP)"
+	@echo "Timeout: $(TIMEOUT) seconds"
+	@echo "-------------------------------"
+	@for i in $$(seq $(REP)); do \
+		echo -n "Running iteration $$i ..."; \
+		if timeout $(TIMEOUT) python3 $(PYTHON) > /dev/null 2>&1; then \
 			echo " OK"; \
 		else \
 			exit_code=$$?; \

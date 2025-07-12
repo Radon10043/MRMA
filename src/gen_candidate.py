@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-07-12 14:32:42
+LastEditTime : 2025-07-12 16:11:48
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -400,8 +400,9 @@ def main(usr_config: dict):
         # otherwise, log the failure and continue to the next iteration
         if gen_succ:
             candidates.append(candidate)
-            lang = candidate.split("\n")[0].strip("```").strip()
-            out_path = os.path.join(out_dir, f"mr_candidate.{lang}")
+            ext = candidate.split("\n")[0].strip("```").strip()
+            ext = "py" if ext == "python" else ext
+            out_path = os.path.join(out_dir, f"mr_candidate.{ext}")
             save_mr_candidate(candidate, out_path)
             gen_situ[1] += 1
             OKF(f"Successfully generated a valid MR candidate after {index + 1} iterations!")

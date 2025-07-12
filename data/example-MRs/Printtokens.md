@@ -1,4 +1,4 @@
-```python
+```py
 @parameterized.expand(load_test_cases)
 def test1(self, tc: str):
     """Metamorphic Relation: Adding a new line containing only a comma increases the output line count by one.

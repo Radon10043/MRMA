@@ -10,7 +10,7 @@ TIMEOUT ?= 5
 
 # cpp compile configurations
 CXX := g++
-CXXFLAGS := -std=c++17 -pthread -Wall -Wextra -Werror
+CXXFLAGS := -std=c++17 -static -pthread -Wall -Wextra -Werror
 INCLUDES := -isystem $(GTEST_DIR)/googletest/include
 LIBS := $(GTEST_DIR)/build/lib/libgtest.a $(GTEST_DIR)/build/lib/libgtest_main.a
 
@@ -25,7 +25,17 @@ JAVASRC := $(JAVAPROJ)/test/DriverTest.java
 # python configurations
 PYTHON ?=
 
-.PHONY: all cpp clean
+# SIR test set configurations
+SIR_CC := gcc
+SIR_CFLAGS := -std=c17 -static -O2
+PT_DIR := $(PROJECT)/software-under-test/Printtokens/src
+PT2_DIR := $(PROJECT)/software-under-test/Printtokens2/src
+SCD_DIR := $(PROJECT)/software-under-test/schedule/src
+SCD2_DIR := $(PROJECT)/software-under-test/schedule2/src
+GREP_DIR := $(PROJECT)/software-under-test/grep/src
+TCAS_DIR := $(PROJECT)/software-under-test/TCAS/src
+
+.PHONY: all clean build_cpp build_java build_python build_sir build_printtokens build_printtokens2 build_schedule build_schedule2 build_grep build_tcas run_cpp run_java run_python download
 
 build_cpp:
 ifneq ($(origin SRC), command line)
@@ -41,6 +51,41 @@ endif
 
 build_python:
 	@echo "No need to build Python program, just run 'make PYTHON=your_file.py run_python'"
+
+build_printtokens:
+	@echo -n "Building Printtokens ... "
+	@$(SIR_CC) $(SIR_CFLAGS) $(PT_DIR)/print_tokens.c $(PT_DIR)/stream.h $(PT_DIR)/tokens.h -o $(PT_DIR)/print_tokens.out 2> /tmp/build_sir.log
+	@echo "OK"
+
+build_printtokens2:
+	@echo -n "Building Printtokens2 ... "
+	@$(SIR_CC) $(PT2_DIR)/print_tokens2.c $(PT2_DIR)/stream.h $(PT2_DIR)/tokens.h -o $(PT2_DIR)/print_tokens2.out 2> /tmp/build_sir.log
+	@echo "OK"
+
+build_schedule:
+	@echo -n "Building schedule ... "
+	@$(SIR_CC) $(SIR_CFLAGS) $(SCD_DIR)/schedule.c -o $(SCD_DIR)/schedule.out 2> /tmp/build_sir.log
+	@echo "OK"
+
+build_schedule2:
+	@echo -n "Building schedule2 ... "
+	@$(SIR_CC) $(SIR_CFLAGS) $(SCD2_DIR)/schedule2.c $(SCD2_DIR)/schedule2.h -o $(SCD2_DIR)/schedule.out 2> /tmp/build_sir.log
+	@echo "OK"
+
+build_grep:
+	@echo -n "Building grep ... "
+	@cd $(GREP_DIR) && \
+		./build.sh > /tmp/build_sir.log 2>&1 && \
+		cd - > /dev/null
+	@echo "OK"
+
+build_tcas:
+	@echo -n "Building TCAS ... "
+	@$(SIR_CC) $(SIR_CFLAGS) $(TCAS_DIR)/tcas.c -o $(TCAS_DIR)/tcas.out 2> /tmp/build_sir.log
+	@echo "OK"
+
+build_sir: build_printtokens build_printtokens2 build_schedule build_schedule2 build_grep build_tcas
+	@echo "Finished building all SIR programs."
 
 run_cpp:
 ifneq ($(origin BIN), command line)

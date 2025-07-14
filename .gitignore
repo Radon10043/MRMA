@@ -276,4 +276,3 @@ pyrightconfig.json
 .vscode/*
 !.vscode/settings.json
 workdir/*
-software-under-test/*

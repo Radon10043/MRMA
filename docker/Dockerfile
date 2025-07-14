@@ -15,7 +15,8 @@ WORKDIR /home
 RUN apt update && \
     curl -fsSL https://deb.nodesource.com/setup_lts.x | bash && \
     apt install -y wget curl make cmake gcc g++ git python3 python3-dev python3-pip vim build-essential libssl-dev openssl libffi-dev graphviz libgraphviz-dev python3-sphinx nodejs cloc jq && \
-    pip install IPython black isort beautifulsoup4 langchain-text-splitters langchain-community langgraph langchain-core langchain-openai pygraphviz marko sphinx sphinx-rtd-theme && \
+    pip install IPython black isort beautifulsoup4 langchain-text-splitters langchain-community langgraph langchain-core langchain-openai pygraphviz marko sphinx sphinx-rtd-theme parameterized && \
+    npm install -g @google/gemini-cli && \
     # Install googletest
     mkdir tools && pushd tools && \
     wget https://github.com/google/googletest/archive/refs/tags/v1.14.0.tar.gz && \
@@ -27,5 +28,4 @@ RUN apt update && \
     wget https://download.oracle.com/java/24/latest/jdk-24_linux-x64_bin.tar.gz && \
     tar xzvf jdk-24_linux-x64_bin.tar.gz && \
     rm jdk-24_linux-x64_bin.tar.gz && \
-    popd && \
-    npm install -g @google/gemini-cli
+    popd

@@ -69,7 +69,7 @@ build_schedule:
 
 build_schedule2:
 	@echo -n "Building schedule2 ... "
-	@$(SIR_CC) $(SIR_CFLAGS) $(SCD2_DIR)/schedule2.c $(SCD2_DIR)/schedule2.h -o $(SCD2_DIR)/schedule.out 2> /tmp/build_sir.log
+	@$(SIR_CC) $(SIR_CFLAGS) $(SCD2_DIR)/schedule2.c $(SCD2_DIR)/schedule2.h -o $(SCD2_DIR)/schedule2.out 2> /tmp/build_sir.log
 	@echo "OK"
 
 build_grep:
@@ -175,4 +175,9 @@ download:
 		https://repo1.maven.org/maven2/com/alibaba/fastjson/1.2.83/fastjson-1.2.83-sources.jar
 
 clean:
-	rm -rf $(BIN_DIR)/
+	rm -f $(PT_DIR)/print_tokens.out
+	rm -f $(PT2_DIR)/print_tokens2.out
+	rm -f $(SCD_DIR)/schedule.out
+	rm -f $(SCD2_DIR)/schedule2.out
+	rm -f $(TCAS_DIR)/tcas.out
+	cd $(GREP_DIR) && rm -rf grep-3.11 && cd - > /dev/null

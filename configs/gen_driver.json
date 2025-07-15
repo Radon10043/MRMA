@@ -1,5 +1,5 @@
 {
-    "candidate": "$PROJECT/workdir/debug/mr_candidate.cpp",
+    "candidate": "$PROJECT/workdir/debug-driver/mr_candidate.cpp",
     "agent": {
         "model": "gemini-2.5-pro",
         "temperature": 1.0,

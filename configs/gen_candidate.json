@@ -1,8 +1,8 @@
 {
     "agent_iden": {
-        "model": "gpt-4o-mini",
+        "model": "gemini-2.5-pro",
         "temperature": 1.0,
-        "top_p": 0.9,
+        "top_p": 1.0,
         "external_corpus": "$PROJECT/data/corpus/Bsearch2.md",
         "prompts": {
             "system": "$PROJECT/data/prompts/iden/system.md",
@@ -13,9 +13,9 @@
         }
     },
     "agent_distn": {
-        "model": "gpt-4o-mini",
+        "model": "gemini-2.5-flash",
         "temperature": 1.0,
-        "top_p": 0.9,
+        "top_p": 1.0,
         "prompts": {
             "system": "$PROJECT/data/prompts/distn/system.md",
             "user": [
@@ -25,9 +25,9 @@
     },
     "agent_cali": [
         {
-            "model": "gemini-2.5-pro",
-            "temperature": 1.0,
-            "top_p": 0.9,
+            "model": "o3-2025-04-16",
+            "temperature": 0.25,
+            "top_p": 0.2,
             "prompts": {
                 "system": "$PROJECT/data/prompts/cali/system.md",
                 "user": [
@@ -37,9 +37,33 @@
             }
         },
         {
-            "model": "o4-mini",
+            "model": "deepseek-r1-250528",
+            "temperature": 0.5,
+            "top_p": 0.4,
+            "prompts": {
+                "system": "$PROJECT/data/prompts/cali/system.md",
+                "user": [
+                    "$PROJECT/data/prompts/cali/user1.md",
+                    "$PROJECT/data/prompts/cali/user2.md"
+                ]
+            }
+        },
+                {
+            "model": "grok-3-reasoner",
+            "temperature": 0.75,
+            "top_p": 0.6,
+            "prompts": {
+                "system": "$PROJECT/data/prompts/cali/system.md",
+                "user": [
+                    "$PROJECT/data/prompts/cali/user1.md",
+                    "$PROJECT/data/prompts/cali/user2.md"
+                ]
+            }
+        },
+        {
+            "model": "claude-sonnet-4-20250514-thinking",
             "temperature": 1.0,
-            "top_p": 0.9,
+            "top_p": 0.8,
             "prompts": {
                 "system": "$PROJECT/data/prompts/cali/system.md",
                 "user": [
@@ -55,9 +79,10 @@
         "example_mr": "$PROJECT/data/example-MRs/Bsearch2.md",
         "example_analysis": "$PROJECT/data/example-analysis/Bsearch2.md"
     },
+    "existing_mrs": [ ],
     "score_calc": "EXP",
     "score_threshold": 0.6,
-    "max_MRs": 2,
+    "max_MRs": 9,
     "max_iter": 10,
-    "output": "$PROJECT/workdir/debug"
+    "output": "$PROJECT/workdir/dryrun/Bsearch2"
 }

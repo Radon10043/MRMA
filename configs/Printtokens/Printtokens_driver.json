@@ -1,0 +1,19 @@
+{
+    "candidate": "$PROJECT/workdir/dryrun/Printtokens/1752328458699/mr_candidate.py",
+    "agent": {
+        "model": "gemini-2.5-pro",
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "prompts": {
+            "system": "$PROJECT/data/prompts/driver/system.md",
+            "user": [
+                "$PROJECT/data/prompts/driver/user1.md",
+                "$PROJECT/data/prompts/driver/user2.md"
+            ]
+        }
+    },
+    "build": {
+        "prefix": "PRINT_TOKENS_PATH=\"$PROJECT/software-under-test/Printtokens/src/print_tokens.out\""
+    },
+    "max_iter": 10
+}

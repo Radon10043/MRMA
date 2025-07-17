@@ -1,10 +1,10 @@
 ```cpp
 /**
  * @brief Metamorphic Relation: Multiplying all the numbers (including the numbers in the array and the searching number), then the output should be the same.
- * Source input: A sorted array `vec` and a target `x`.
- * Input relation: Create `vec'` and `x'` by multiplying `vec` and `x` by a positive constant.
- * Output relation: `bin_search(vec, x)` must equal `bin_search(vec', x')`.
- * Rationale: The algorithm's logic depends on ordinal relationships, which are preserved under uniform scaling.
+ * - Source input: A sorted array `vec` and a target `x`.
+ * - Input relation: Create `vec'` and `x'` by multiplying `vec` and `x` by a positive constant.
+ * - Output relation: `bin_search(vec, x)` must equal `bin_search(vec', x')`.
+ * - Rationale: The algorithm's logic depends on ordinal relationships, which are preserved under uniform scaling.
  *
  */
 TEST_P(BSearchParamTest, MR1) {

@@ -1,0 +1,2 @@
+1. Two different sets of operations: The first is moving one job to the end of one job-list. The second is putting the job on the PB at first and then taking it out and putting it at the end of that job-list. They will output the same.
+2. Two different sets of operations: The first is adding one job at the end of the P3, while the second is adding one job at the end of P2 and then moving it to P3. They will output the same.

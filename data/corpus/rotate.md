@@ -1,0 +1,1 @@
+1. Rotating the same image by N degree and N + 360 degree will output the same result.

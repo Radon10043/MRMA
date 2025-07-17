@@ -1,0 +1,1 @@
+1. Adding one same character to the end of A and C, the result will be the same.

@@ -1,0 +1,1 @@
+1. Reversing this array, the output should be the same.

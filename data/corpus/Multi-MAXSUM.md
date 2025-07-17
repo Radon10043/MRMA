@@ -1,0 +1,1 @@
+1. Adding one number at the end of the array, then the output should be the same as or larger than the original one.

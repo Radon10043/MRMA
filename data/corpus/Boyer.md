@@ -1,0 +1,2 @@
+1. If the pattern occurred in the original text, when adding one character to the end of the source text, the output should be the same.
+2. If the pattern occurred in the original text, when deleting one character from the end of the pattern, the output should be the same as or less than the original output.

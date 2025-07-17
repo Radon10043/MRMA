@@ -1,0 +1,1 @@
+1. Adding one point to this plane, the distance should not be larger than before.

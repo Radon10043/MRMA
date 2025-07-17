@@ -1,0 +1,1 @@
+1. Adding one character to the end of A, the number of unique ways should be the same or larger.

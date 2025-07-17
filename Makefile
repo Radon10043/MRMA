@@ -18,7 +18,7 @@ LIBS := $(GTEST_DIR)/build/lib/libgtest.a $(GTEST_DIR)/build/lib/libgtest_main.a
 JAVAPROJ ?=
 JAVA := java
 JAVAC := javac
-JAVAFLAGS := -cp "$(JAVAPROJ)/bin:$(JAVAPROJ)/lib/*" org.junit.platform.console.ConsoleLauncher --scan-class-path
+JAVAFLAGS := -cp "$(JAVAPROJ)/bin:$(JAVAPROJ)/lib/*" org.junit.platform.console.ConsoleLauncher -disable-ansi-colors --scan-class-path
 JAVACFLAGS := -d $(JAVAPROJ)/bin -cp "$(JAVAPROJ)/lib/*"
 JAVASRC := $(JAVAPROJ)/test/DriverTest.java
 
@@ -181,3 +181,6 @@ clean:
 	rm -f $(SCD2_DIR)/schedule2.out
 	rm -f $(TCAS_DIR)/tcas.out
 	cd $(GREP_DIR) && rm -rf grep-3.11 && cd - > /dev/null
+
+cleantmp:
+	rm -rf /tmp/test_driver*

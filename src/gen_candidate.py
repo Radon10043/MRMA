@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-07-12 16:11:48
+LastEditTime : 2025-07-17 11:09:00
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -355,6 +355,7 @@ def main(usr_config: dict):
             prompt_prevent_dup = "\n\n".join(candidates)
             prompt_prevent_dup = f"Please do not generate a metamorphic relation that is repeated with the following:\n{prompt_prevent_dup}\n\n"
         replacements["prompt_prevent_dup"] = prompt_prevent_dup
+        # TODO: Add tools for reading code?
         agent_iden = Agent(config_iden, [retrieve], replacements)
 
         # Generate unique thread IDs for chating iteratively

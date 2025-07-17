@@ -2,11 +2,12 @@
 Author       : Radon
 Date         : 2025-07-10 17:43:16
 LastEditors  : Radon
-LastEditTime : 2025-07-12 14:45:43
+LastEditTime : 2025-07-17 12:36:04
 Description  : Generate test driver for encoded-MRCs
 """
 
 import argparse
+import glob
 import json
 import os
 import shutil
@@ -38,6 +39,7 @@ class Driver:
         self.replacements = user_config.get("replacements", {})
         self.cand_path = user_config["candidate"]
         self.ext = Path(self.cand_path).suffix[1:]  # Remove the leading dot from the file extension
+        self.uuid = uuid.uuid4().hex[:8]  # Unique identifier for the driver instance
 
     def preprocessing(self):
         """Preprocessing for the driver generation, including update candidate code with prefix."""
@@ -69,6 +71,7 @@ class Driver:
         code : str
             The code to be saved as a test driver.
         """
+        # TODO: Do we need format the code before saving?
         out_path = os.path.join(out_dir, "test_driver." + self.ext)
         Path(out_path).write_text(code, encoding="utf-8")
 
@@ -90,7 +93,7 @@ class DriverCpp(Driver):
             A tuple containing a boolean indicating success or failure, and a string with error messages if any.
         """
         cxx = "g++"
-        filepath = "/tmp/test_driver.cpp"
+        filepath = f"/tmp/test_driver.{self.uuid}.cpp"
         gtest_dir = os.getenv("GTEST_DIR")
         Path(filepath).write_text(code, encoding="utf-8")
 
@@ -132,6 +135,17 @@ class DriverJava(Driver):
         additional_reqs += "- The following jar packages are available for you: " + ", ".join(avaliable_jars) + ".\n"
         self.replacements["additional_reqs"] = additional_reqs
 
+        # Create a Java toy
+        self.build_dir = f"/tmp/test_driver_java_{self.uuid}"
+        self.create_java_project(self.build_dir)
+
+        # Copy the source files to the src directory if the key `srcdir` exists in the build config.
+        config_build = self.user_config.get("build", {})
+        srcdir = config_build.get("srcdir", None)
+        if srcdir:
+            shutil.copytree(srcdir, os.path.join(self.build_dir, "src"), dirs_exist_ok=True)
+
+
     def create_java_project(self, build_dir: str):
         """Create a basic Java project structure for the test driver.
 
@@ -167,26 +181,24 @@ class DriverJava(Driver):
         tuple[bool, str]
             A tuple containing a boolean indicating success or failure, and a string with error messages if any.
         """
-        # Create a Java toy
-        build_dir = "/tmp/test_driver_java"
-        self.create_java_project(build_dir)
-
         # Write the code to a Java file
-        filepath = os.path.join(build_dir, "test", "DriverTest.java")
+        filepath = os.path.join(self.build_dir, "test", "DriverTest.java")
         Path(filepath).write_text(code, encoding="utf-8")
 
         # Compile .java file to .class file
+        java_files = glob.glob(os.path.join(self.build_dir, "src", "*.java"))
         cmd = [
             "javac",
             "-d",
             "bin",
             "-cp",
             "lib/*",
-            f"test/DriverTest.java",
+            "test/DriverTest.java",
+            *java_files,
         ]
         result = subprocess.run(
             cmd,
-            cwd=build_dir,
+            cwd=self.build_dir,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
@@ -195,7 +207,8 @@ class DriverJava(Driver):
         return result.returncode == 0, result.stderr
 
     def save(self, code: str, out_dir: str):
-        """Save the generated Java test driver code to a file.
+        """Save the generated Java test driver code to a file, just copy the whole directory
+        of "/tmp/test_driver_java" to the output directory simply.
 
         Parameters
         ----------
@@ -205,9 +218,7 @@ class DriverJava(Driver):
             The output directory where the test driver will be saved.
         """
         driver_dir = os.path.join(out_dir, "test_driver")
-        self.create_java_project(driver_dir)
-        filepath = os.path.join(driver_dir, "test", "DriverTest.java")
-        Path(filepath).write_text(code, encoding="utf-8")
+        shutil.copytree(self.build_dir, driver_dir, dirs_exist_ok=True)
 
 
 class DriverPython(Driver):

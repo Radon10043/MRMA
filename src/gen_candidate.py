@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-07-17 11:09:00
+LastEditTime : 2025-07-18 15:47:59
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -373,6 +373,8 @@ def main(usr_config: dict):
 
             # Extract metamorphic relation candidate
             candidate = get_first_code_block(response)
+            if len(candidate) == 0:
+                FATAL("Failed to generate codified metamorphic relation candidate!")
 
             # Prompt calibration agents to verify the MR candidate
             ACTF("Prompting calibration agent(s) to verify the MR candidate ...")

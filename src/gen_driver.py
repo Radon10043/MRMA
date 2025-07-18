@@ -2,12 +2,11 @@
 Author       : Radon
 Date         : 2025-07-10 17:43:16
 LastEditors  : Radon
-LastEditTime : 2025-07-17 12:36:04
+LastEditTime : 2025-07-18 20:35:33
 Description  : Generate test driver for encoded-MRCs
 """
 
 import argparse
-import glob
 import json
 import os
 import shutil
@@ -145,7 +144,6 @@ class DriverJava(Driver):
         if srcdir:
             shutil.copytree(srcdir, os.path.join(self.build_dir, "src"), dirs_exist_ok=True)
 
-
     def create_java_project(self, build_dir: str):
         """Create a basic Java project structure for the test driver.
 
@@ -186,7 +184,8 @@ class DriverJava(Driver):
         Path(filepath).write_text(code, encoding="utf-8")
 
         # Compile .java file to .class file
-        java_files = glob.glob(os.path.join(self.build_dir, "src", "*.java"))
+        tmp = Path(self.build_dir, "src").rglob("*.java")
+        java_files = [str(file) for file in tmp]
         cmd = [
             "javac",
             "-d",

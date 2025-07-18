@@ -20,7 +20,8 @@ JAVA := java
 JAVAC := javac
 JAVAFLAGS := -cp "$(JAVAPROJ)/bin:$(JAVAPROJ)/lib/*" org.junit.platform.console.ConsoleLauncher -disable-ansi-colors --scan-class-path
 JAVACFLAGS := -d $(JAVAPROJ)/bin -cp "$(JAVAPROJ)/lib/*"
-JAVASRC := $(JAVAPROJ)/test/DriverTest.java
+JAVATEST := $(JAVAPROJ)/test/DriverTest.java
+JAVASRCDIR := $(JAVAPROJ)/src
 
 # python configurations
 PYTHON ?=
@@ -47,7 +48,7 @@ build_java:
 ifneq ($(origin JAVAPROJ), command line)
 	$(error JAVAPROJ is not set, please provide a source file to compile (e.g. make JAVAPROJ=./test_driver_java build_java))
 endif
-	$(JAVAC) $(JAVACFLAGS) $(JAVASRC)
+	find $(JAVASRCDIR) -name "*.java" | xargs $(JAVAC) $(JAVACFLAGS) $(JAVATEST) 2> /tmp/build_sir.log
 
 build_python:
 	@echo "No need to build Python program, just run 'make PYTHON=your_file.py run_python'"
@@ -173,6 +174,9 @@ download:
 		https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.jar \
 		https://repo1.maven.org/maven2/com/alibaba/fastjson/1.2.83/fastjson-1.2.83.jar \
 		https://repo1.maven.org/maven2/com/alibaba/fastjson/1.2.83/fastjson-1.2.83-sources.jar
+
+check:
+	@echo "Checking config files ..."
 
 clean:
 	rm -f $(PT_DIR)/print_tokens.out

@@ -48,7 +48,7 @@ build_java:
 ifneq ($(origin JAVAPROJ), command line)
 	$(error JAVAPROJ is not set, please provide a source file to compile (e.g. make JAVAPROJ=./test_driver_java build_java))
 endif
-	find $(JAVASRCDIR) -name "*.java" | xargs $(JAVAC) $(JAVACFLAGS) $(JAVATEST) 2> /tmp/build_sir.log
+	find $(JAVASRCDIR) -name "*.java" | xargs $(JAVAC) $(JAVACFLAGS) $(JAVATEST) 2> /tmp/build_java.log
 
 build_python:
 	@echo "No need to build Python program, just run 'make PYTHON=your_file.py run_python'"

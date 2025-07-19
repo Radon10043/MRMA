@@ -1,7 +1,5 @@
 # MR-CoT-RAG
 
-TODO: Use sphinx to generate documents.
-
 gen_driver.json:
 
 - candidate: MR candidate file path.
@@ -31,3 +29,8 @@ gen_driver.json:
     "max_iter": 10
 }
 ```
+
+TODO:
+[ ]: Add `make check` to check whether `api_key` or `base_url` maybe leaked
+[ ]: Use Sphinx to generate documents
+[ ]: Should we use newer version of Lucene, Jodatime, JAMA, etc.?

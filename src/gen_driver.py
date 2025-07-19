@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-07-10 17:43:16
 LastEditors  : Radon
-LastEditTime : 2025-07-18 20:35:33
+LastEditTime : 2025-07-19 08:50:15
 Description  : Generate test driver for encoded-MRCs
 """
 
@@ -44,7 +44,14 @@ class Driver:
         """Preprocessing for the driver generation, including update candidate code with prefix."""
         config_build = self.user_config.get("build", {})
         code = Path(self.cand_path).read_text(encoding="utf-8")
+
+        # If prefix is a specified file, read it and expand environment variables
+        # Otherwise, use it as a string directly
         prefix = config_build.get("prefix", "")
+        if Path(prefix).is_file():
+            prefix = Path(prefix).read_text(encoding="utf-8")
+            prefix = os.path.expandvars(prefix)
+
         code = prefix + "\n" + code
         code = f"```{self.ext}\n{code}\n```"  # Wrap code in fenced code block with language tag
         self.replacements["candidate"] = code

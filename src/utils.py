@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-27 16:42:43
 LastEditors  : Radon
-LastEditTime : 2025-07-12 14:31:32
+LastEditTime : 2025-07-20 04:30:13
 Description  : Utility functions
 """
 
@@ -66,7 +66,7 @@ def BADF(msg: str, verbose: bool = True):
 
 
 def FATAL(msg: str):
-    SAYF(TerminalColors.cLRD + "[-] PROGRAM ABORT :  " + TerminalColors.cRST + msg + "\n")
+    SAYF(TerminalColors.cLRD + "[-] PROGRAM ABORT : " + TerminalColors.cRST + msg + "\n")
     exit(1)
 
 

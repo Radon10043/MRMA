@@ -185,6 +185,7 @@ clean:
 	rm -f $(SCD_DIR)/schedule.out
 	rm -f $(SCD2_DIR)/schedule2.out
 	rm -f $(TCAS_DIR)/tcas.out
+	rm -f check.log
 	cd $(GREP_DIR) && rm -rf grep-3.11 && cd - > /dev/null
 
 cleantmp:

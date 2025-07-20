@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-07-20 02:34:17
 LastEditors  : Radon
-LastEditTime : 2025-07-20 06:31:52
+LastEditTime : 2025-07-20 06:43:19
 Description  : Check the quality of configs in $PROJECT/configs.
 """
 
@@ -178,6 +178,8 @@ def main(args: argparse.Namespace):
     configs_path = os.path.join(project_path, "configs")  # type: ignore
     configs = list()
     for root, _, files in os.walk(configs_path):
+        if os.path.basename(root) == "template":
+            continue
         for file in files:
             if file.endswith(".json"):
                 configs.append(os.path.join(root, file))

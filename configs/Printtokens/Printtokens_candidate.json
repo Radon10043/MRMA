@@ -48,7 +48,7 @@
                 ]
             }
         },
-                {
+        {
             "model": "grok-3-reasoner",
             "temperature": 0.75,
             "top_p": 0.6,
@@ -74,15 +74,15 @@
         }
     ],
     "replacements": {
-        "sut_name": "Printtokens",
+        "sut_name": "Lexical analyzer print_tokens",
         "specification": "$PROJECT/data/specs/Printtokens.md",
         "example_mr": "$PROJECT/data/example-MRs/Printtokens.md",
         "example_analysis": "$PROJECT/data/example-analysis/Printtokens.md"
     },
-    "existing_mrs": [ ],
+    "existing_mrs": [],
     "score_calc": "EXP",
     "score_threshold": 0.6,
-    "max_MRs": 1,
+    "max_MRs": 40,
     "max_iter": 10,
     "output": "$PROJECT/workdir/dryrun/Printtokens"
 }

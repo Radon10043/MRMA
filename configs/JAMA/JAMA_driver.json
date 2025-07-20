@@ -1,0 +1,20 @@
+{
+    "candidate": "$PROJECT/workdir/dryrun/JAMA/1752841702894/mr_candidate.java",
+    "agent": {
+        "model": "gemini-2.5-pro",
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "prompts": {
+            "system": "$PROJECT/data/prompts/driver/system.md",
+            "user": [
+                "$PROJECT/data/prompts/driver/user1.md",
+                "$PROJECT/data/prompts/driver/user2.md"
+            ]
+        }
+    },
+    "build": {
+        "srcdir": "$PROJECT/software-under-test/JAMA/Jama",
+        "prefix": "import Jama.Matrix;\n"
+    },
+    "max_iter": 10
+}

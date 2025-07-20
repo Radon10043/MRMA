@@ -1,0 +1,88 @@
+{
+    "agent_iden": {
+        "model": "gemini-2.5-pro",
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "external_corpus": "$PROJECT/data/corpus/Printtokens2.md",
+        "prompts": {
+            "system": "$PROJECT/data/prompts/iden/system.md",
+            "user": [
+                "$PROJECT/data/prompts/iden/user1.md",
+                "$PROJECT/data/prompts/iden/user2.md"
+            ]
+        }
+    },
+    "agent_distn": {
+        "model": "gemini-2.5-flash",
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "prompts": {
+            "system": "$PROJECT/data/prompts/distn/system.md",
+            "user": [
+                "$PROJECT/data/prompts/distn/user1.md"
+            ]
+        }
+    },
+    "agent_cali": [
+        {
+            "model": "o3-2025-04-16",
+            "temperature": 0.25,
+            "top_p": 0.2,
+            "prompts": {
+                "system": "$PROJECT/data/prompts/cali/system.md",
+                "user": [
+                    "$PROJECT/data/prompts/cali/user1.md",
+                    "$PROJECT/data/prompts/cali/user2.md"
+                ]
+            }
+        },
+        {
+            "model": "deepseek-r1-250528",
+            "temperature": 0.5,
+            "top_p": 0.4,
+            "prompts": {
+                "system": "$PROJECT/data/prompts/cali/system.md",
+                "user": [
+                    "$PROJECT/data/prompts/cali/user1.md",
+                    "$PROJECT/data/prompts/cali/user2.md"
+                ]
+            }
+        },
+        {
+            "model": "grok-3-reasoner",
+            "temperature": 0.75,
+            "top_p": 0.6,
+            "prompts": {
+                "system": "$PROJECT/data/prompts/cali/system.md",
+                "user": [
+                    "$PROJECT/data/prompts/cali/user1.md",
+                    "$PROJECT/data/prompts/cali/user2.md"
+                ]
+            }
+        },
+        {
+            "model": "claude-sonnet-4-20250514-thinking",
+            "temperature": 1.0,
+            "top_p": 0.8,
+            "prompts": {
+                "system": "$PROJECT/data/prompts/cali/system.md",
+                "user": [
+                    "$PROJECT/data/prompts/cali/user1.md",
+                    "$PROJECT/data/prompts/cali/user2.md"
+                ]
+            }
+        }
+    ],
+    "replacements": {
+        "sut_name": "Lexical analyzer print_tokens2",
+        "specification": "$PROJECT/data/specs/Printtokens2.md",
+        "example_mr": "$PROJECT/data/example-MRs/Printtokens2.md",
+        "example_analysis": "$PROJECT/data/example-analysis/Printtokens2.md"
+    },
+    "existing_mrs": [],
+    "score_calc": "EXP",
+    "score_threshold": 0.6,
+    "max_MRs": 40,
+    "max_iter": 10,
+    "output": "$PROJECT/workdir/dryrun/Printtokens2"
+}

@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-07-10 17:43:16
 LastEditors  : Radon
-LastEditTime : 2025-07-19 08:50:15
+LastEditTime : 2025-07-21 17:05:31
 Description  : Generate test driver for encoded-MRCs
 """
 
@@ -18,8 +18,8 @@ from dotenv import load_dotenv
 from langchain.prompts import PromptTemplate
 from langchain_core.runnables import RunnableConfig
 
-from fake_code import *
-from utils import *
+from .fake_code import *
+from .utils import *
 
 
 class Driver:

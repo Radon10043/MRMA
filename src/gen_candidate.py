@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-07-18 15:47:59
+LastEditTime : 2025-07-21 17:04:09
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -23,7 +23,7 @@ from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from utils import *
+from .utils import *
 
 # fmt:off
 ########## GLOBAL VARIABLES ##########

@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-07-20 02:34:17
 LastEditors  : Radon
-LastEditTime : 2025-07-20 06:43:19
+LastEditTime : 2025-07-21 17:05:21
 Description  : Check the quality of configs in $PROJECT/configs.
 """
 
@@ -13,7 +13,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from utils import *
+from .utils import *
 
 # Error codes & corresponding messages
 EAPILEAK = 0b00000001  # API key or base URL is leaked

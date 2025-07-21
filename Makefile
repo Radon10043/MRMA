@@ -176,7 +176,7 @@ download:
 		https://repo1.maven.org/maven2/com/alibaba/fastjson/1.2.83/fastjson-1.2.83-sources.jar
 
 check:
-	@python3 src/check.py --out check.log
+	@python3 -m src.check --out check.log
 	@echo "Check completed, see details in check.log"
 
 clean:

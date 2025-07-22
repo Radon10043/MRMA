@@ -1,0 +1,13 @@
+diff --git a/software-under-test/Bsearch2/src/function.h b/software-under-test/Bsearch2/src/function.h
+index 7c5c621..c39bf0d 100644
+--- a/software-under-test/Bsearch2/src/function.h
++++ b/software-under-test/Bsearch2/src/function.h
+@@ -28,6 +28,8 @@ int p(int a[], int e, int len) {
+ }
+ 
+ bool bin_search(vector<int> vec, int x) {
++    if (vec.empty())
++        return false;
+     return p(vec.data(), x, vec.size());
+ }
+ 

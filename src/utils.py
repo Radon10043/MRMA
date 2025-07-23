@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-27 16:42:43
 LastEditors  : Radon
-LastEditTime : 2025-07-20 04:30:13
+LastEditTime : 2025-07-23 14:14:53
 Description  : Utility functions
 """
 
@@ -102,6 +102,8 @@ class Agent:
         )
         prompt_template = PromptTemplate.from_file(config["prompts"]["system"])
         self.sys_prompt = prompt_template.invoke(replacements).to_string()
+        if len(tools) > 0:
+            self.sys_prompt += f"\n\nYou can access the following tools:\n\n{[tool.name for tool in tools]}\n\n"
         memory = MemorySaver()
         self.instance = create_react_agent(
             model=self.llm,

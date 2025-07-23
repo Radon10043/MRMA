@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-27 16:42:43
 LastEditors  : Radon
-LastEditTime : 2025-07-23 16:59:58
+LastEditTime : 2025-07-23 17:26:47
 Description  : Utility functions
 """
 
@@ -373,6 +373,9 @@ def default_close_config(sut: str) -> dict:
             os.path.join(project_path, "data", "prompts", "cali", "user1.md"),
             os.path.join(project_path, "data", "prompts", "cali", "user2.md"),
         ]
+        if dt["model"] == "mistral-medium-2505":
+            dt["base_url"] = os.getenv("MISTRAL_OPENAI_API_BASE")
+            dt["api_key"] = os.getenv("MISTRAL_OPENAI_API_KEY")
     cfg["replacements"]["specification"] = os.path.join(project_path, "data", "specs", sut + ".md")
     cfg["replacements"]["example_mr"] = os.path.join(project_path, "data", "examples-MRs", sut + ".md")
     cfg["replacements"]["example_analysis"] = os.path.join(project_path, "data", "examples-analysis", sut + ".md")

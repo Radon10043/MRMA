@@ -15,7 +15,7 @@ def RQ6(args):
     for sut in suts:
         for temperature in [0.0, 0.5, 1.0, 1.5, 2.0]:
             for top_p in [0.0, 0.5, 1.0]:
-                SAYF(f"==================== [SUT: {sut} / temperature: {temperature} / top_p: {top_p}] ====================")
+                SAYF(f"==================== [SUT: {sut} / temperature: {temperature} / top_p: {top_p}] ====================\n")
                 cfg = default_close_config(sut)
                 cfg["agent_iden"]["temperature"] = temperature
                 cfg["agent_iden"]["top_p"] = top_p

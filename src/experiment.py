@@ -15,9 +15,14 @@ def RQ6(args):
     for sut in suts:
         for temperature in [0.0, 0.5, 1.0, 1.5, 2.0]:
             for top_p in [0.0, 0.5, 1.0]:
+                SAYF(f"==================== [SUT: {sut} / temperature: {temperature} / top_p: {top_p}] ====================")
                 cfg = default_close_config(sut)
                 cfg["agent_iden"]["temperature"] = temperature
                 cfg["agent_iden"]["top_p"] = top_p
+                out_dir = os.path.join(project_path, "workdir", "RQ6", f"close-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
+                if len(os.listdir(out_dir)) >= 10:
+                    WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
+                    continue
                 cfg["output"] = os.path.join(project_path, "workdir", "RQ6", f"close-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
                 src.gen_candidate.main(cfg)
 

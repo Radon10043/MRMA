@@ -1,1 +1,3 @@
+Existing metamorphic relations of The Shortest Superstring Identification Algorithm are shown as follows:
+
 1. Adding one string A to the array, and A must be contained in the original array, then the output should be the same.

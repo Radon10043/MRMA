@@ -1,2 +1,4 @@
+Existing metamorphic relations of Key-lock Problem are shown as follows:
+
 1. Adding a useless key row (all 0s, these keys cannot open any lock) to the end of the matrix M, then the output will not change.
 2. Adding a column with all 1s (the added lock can be open by any key) to the matrix M, then the output will not change.

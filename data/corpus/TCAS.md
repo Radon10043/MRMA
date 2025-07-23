@@ -1,3 +1,5 @@
+Existing metamorphic relations of Traffic Collision Avoidance System are shown as follows:
+
 1. If the relation of the 4th parameter and 6th parameter is not changed, meanwhile other parameter values are not changed too, then the outputs of the TCAS should be the same.
 2. Given that the intruder aircraft does not have the TCAS system, if we change the state that the intruder aircraft has an intention or not, the output should not change.
 3. Given that the intruder aircraft does not have the TCAS system, if we change the state that the report describing the presence of any intruder is valid or not, the output should not change.

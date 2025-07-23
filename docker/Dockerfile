@@ -1,5 +1,7 @@
 FROM ubuntu:22.04
 
+SHELL ["/bin/bash", "-c"]
+
 # Avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Shanghai
@@ -14,16 +16,18 @@ WORKDIR /home
 
 RUN apt update && \
     apt install -y wget curl make cmake gcc g++ git python3 python3-dev python3-pip vim build-essential libssl-dev openssl libffi-dev graphviz libgraphviz-dev python3-sphinx nodejs cloc jq unzip && \
-    pip install IPython black isort beautifulsoup4 langchain-text-splitters langchain-community langgraph langchain-core langchain-openai pygraphviz marko sphinx sphinx-rtd-theme parameterized scipy opencv-python && \
-    # Install googletest
-    mkdir tools && pushd tools && \
+    pip install IPython black isort beautifulsoup4 langchain-text-splitters langchain-community langgraph langchain-core langchain-openai pygraphviz marko sphinx sphinx-rtd-theme parameterized scipy opencv-python
+
+# Install googletest
+RUN mkdir tools && pushd tools && \
     wget https://github.com/google/googletest/archive/refs/tags/v1.14.0.tar.gz && \
     tar zxvf v1.14.0.tar.gz && pushd googletest-1.14.0 && \
     mkdir build && pushd build && \
     cmake .. && make && make install && \
-    popd && popd && rm v1.14.0.tar.gz && \
-    # Install jdk-24
+    popd && popd && rm v1.14.0.tar.gz
+
+# Install jdk-24
+RUN pushd tools && \
     wget https://download.oracle.com/java/24/latest/jdk-24_linux-x64_bin.tar.gz && \
     tar xzvf jdk-24_linux-x64_bin.tar.gz && \
-    rm jdk-24_linux-x64_bin.tar.gz && \
-    popd
+    rm jdk-24_linux-x64_bin.tar.gz

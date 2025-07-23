@@ -36,7 +36,7 @@ SCD2_DIR := $(PROJECT)/software-under-test/schedule2/src
 GREP_DIR := $(PROJECT)/software-under-test/grep/src
 TCAS_DIR := $(PROJECT)/software-under-test/TCAS/src
 
-.PHONY: all clean build_cpp build_java build_python build_sir build_printtokens build_printtokens2 build_schedule build_schedule2 build_grep build_tcas run_cpp run_java run_python download
+.PHONY: all clean build_cpp build_java build_python build_sir build_printtokens build_printtokens2 build_schedule build_schedule2 build_grep build_tcas run_cpp run_java run_python download patch
 
 build_cpp:
 ifneq ($(origin SRC), command line)
@@ -178,6 +178,17 @@ download:
 check:
 	@python3 -m src.check --out check.log
 	@echo "Check completed, see details in check.log"
+
+patch_sut:
+	@echo -n "Applying patches ... "
+	@git -C Empirical-Study-LLM-MR apply $(PWD)/patch/sut.patch
+	@echo "OK."
+
+restore_sut:
+	@echo -n "Restoring submodules ... "
+	@git -C Empirical-Study-LLM-MR checkout . 2> /dev/null
+	@git -C Empirical-Study-LLM-MR clean -fd 2> /dev/null
+	@echo "OK."
 
 clean:
 	rm -f $(PT_DIR)/print_tokens.out

@@ -23,7 +23,7 @@ def RQ6(args):
                 if os.path.exists(out_dir) and len(os.listdir(out_dir)) >= 10:
                     WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
                     continue
-                cfg["output"] = os.path.join(project_path, "workdir", "RQ6", f"close-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
+                cfg["output"] = out_dir
                 src.gen_candidate.main(cfg)
 
 

@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-27 16:42:43
 LastEditors  : Radon
-LastEditTime : 2025-07-23 16:38:33
+LastEditTime : 2025-07-23 16:59:58
 Description  : Utility functions
 """
 
@@ -360,13 +360,13 @@ def default_close_config(sut: str) -> dict:
         os.path.join(project_path, "data", "prompts", "iden", "user2.md"),
     ]
     cfg["agent_iden"]["base_url"] = os.getenv("GOOGLE_OPENAI_API_BASE")
-    cfg["agent_iden"]["api_key"] = os.getenv("GOOGLE_OPENAI_API_KEY")
+    cfg["agent_iden"]["api_key"] = os.getenv("GOOGLE_API_KEY")
     cfg["agent_distn"]["prompts"]["system"] = os.path.join(project_path, "data", "prompts", "distn", "system.md")
     cfg["agent_distn"]["prompts"]["user"] = [
         os.path.join(project_path, "data", "prompts", "distn", "user1.md"),
     ]
     cfg["agent_distn"]["base_url"] = os.getenv("GOOGLE_OPENAI_API_BASE")
-    cfg["agent_distn"]["api_key"] = os.getenv("GOOGLE_OPENAI_API_KEY")
+    cfg["agent_distn"]["api_key"] = os.getenv("GOOGLE_API_KEY")
     for dt in cfg["agent_cali"]:
         dt["prompts"]["system"] = os.path.join(project_path, "data", "prompts", "cali", "system.md")
         dt["prompts"]["user"] = [

@@ -3,7 +3,7 @@ import os
 
 from dotenv import load_dotenv
 
-import gen_candidate
+import src.gen_candidate
 
 from .utils import *
 
@@ -18,8 +18,8 @@ def RQ6(args):
                 cfg = default_close_config(sut)
                 cfg["agent_iden"]["temperature"] = temperature
                 cfg["agent_iden"]["top_p"] = top_p
-                cfg["output"] = os.path.join(project_path, "workdir", "RQ6", "close", sut)
-                gen_candidate.main(cfg)
+                cfg["output"] = os.path.join(project_path, "workdir", "RQ6", f"close-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
+                src.gen_candidate.main(cfg)
 
 
 if __name__ == "__main__":
@@ -29,3 +29,6 @@ if __name__ == "__main__":
 
     rq6_parser = subparsers.add_parser("RQ6", help="Run RQ6 experiment")
     rq6_parser.set_defaults(func=RQ6)
+
+    args = parser.parse_args()
+    args.func(args)

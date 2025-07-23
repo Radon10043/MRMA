@@ -20,7 +20,7 @@ def RQ6(args):
                 cfg["agent_iden"]["temperature"] = temperature
                 cfg["agent_iden"]["top_p"] = top_p
                 out_dir = os.path.join(project_path, "workdir", "RQ6", f"close-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
-                if len(os.listdir(out_dir)) >= 10:
+                if os.path.exists(out_dir) and len(os.listdir(out_dir)) >= 10:
                     WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
                     continue
                 cfg["output"] = os.path.join(project_path, "workdir", "RQ6", f"close-temp_{temperature:.1f}-top_{top_p:.1f}", sut)

@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-07-21 17:04:09
+LastEditTime : 2025-07-23 16:42:08
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -11,6 +11,7 @@ import concurrent.futures
 import json
 import math
 import os
+import random
 import uuid
 from pathlib import Path
 
@@ -366,19 +367,24 @@ def main(usr_config: dict):
 
         # Start a new chat to identify one metamorphic relation candidate
         while index < max_iter:
-            # Prompt identification agent to generate a metamorphic relation candidate
-            act = "generate" if index == 0 else "fix"
-            ACTF(f"Prompting identification agent to {act} a metamorphic relation candidate ...")
-            response = identify(agent_iden, index, replacements)
-
-            # Extract metamorphic relation candidate
-            candidate = get_first_code_block(response)
-            if len(candidate) == 0:
-                FATAL("Failed to generate codified metamorphic relation candidate!")
-
-            # Prompt calibration agents to verify the MR candidate
-            ACTF("Prompting calibration agent(s) to verify the MR candidate ...")
-            cali_res_lst = calibrate_parallel(agent_cali, index, replacements, candidate)
+            # Prompt identification agent to generate a metamorphic relation candidate, then
+            # extract metamorphic relation candidate, prompt calibration agents to verify
+            # the MR candidate.
+            try:
+                act = "generate" if index == 0 else "fix"
+                ACTF(f"Prompting identification agent to {act} a metamorphic relation candidate ...")
+                response = identify(agent_iden, index, replacements)
+                candidate = get_first_code_block(response)
+                if len(candidate) == 0:
+                    FATAL("Failed to generate codified metamorphic relation candidate!")
+                ACTF("Prompting calibration agent(s) to verify the MR candidate ...")
+                cali_res_lst = calibrate_parallel(agent_cali, index, replacements, candidate)
+            except BaseException as e:
+                t = random.randint(1, 60)   # Have a break :)
+                WARNF("ERROR: " + repr(e))
+                WARNF(f"Have a break for ({t} seconds) ...")
+                time.sleep(t)
+                continue
 
             # Calculate confidence score of calibration
             score = calculate_score(cali_res_lst, calc_method)

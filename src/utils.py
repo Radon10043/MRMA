@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-27 16:42:43
 LastEditors  : Radon
-LastEditTime : 2025-07-23 14:14:53
+LastEditTime : 2025-07-23 16:38:33
 Description  : Utility functions
 """
 
@@ -39,6 +39,144 @@ class TerminalColors:
     cLCY = "\033[1;96m"
     cBRI = "\033[1;97m"
     cRST = "\033[0m"
+
+
+#########################################################
+### Dictionary to map sut abbreviations to full names ###
+#########################################################
+# fmt:off
+SUT_DICT = {
+    "ACMS"                 : "Aviation Consignment Management System",
+    "Boyer"                : "Boyer-Moore algorithm",
+    "Bsearch1"             : "Get Range Algorithm",
+    "Bsearch2"             : "Binary Search Algorithm",
+    "ClosestPair"          : "Closest Distance Algorithm",
+    "CUBS"                 : "China Unicom Billing System",
+    "Determinant1"         : "Michael Thomas Flanagan's Library",
+    "DistinctSubsequence"  : "Number of Distinct Subsequences Calculation Algorithm",
+    "Editingdistance"      : "Editing Distance Calculation Algorithm",
+    "ERS"                  : "Expense Reimbursement System",
+    "f_oneway"             : "One-way ANOVA",
+    "FastJson"             : "FastJson",
+    "FirstMissingPositive" : "Smallest Positive Integer Finding Algorithm",
+    "grep"                 : "grep",
+    "HeapSort"             : "Heap Sort Algorithm",
+    "InterleavingString"   : "Interleaved String Checking Algorithm",
+    "JAMA"                 : "Java Matrix Package JAMA",
+    "Jodatime"             : "Jodatime",
+    "Klp"                  : "Key-lock Problem",
+    "Lucene"               : "Text Search Engine Lucene",
+    "MaxRectangle"         : "Largest Area of Rectangle Calculation Algorithm",
+    "Maxsub"               : "Maximum Subarray Sum Calculation Algorithm",
+    "MOS"                  : "Meal Ordering System",
+    "Multi-MAXSUM"         : "Maximum Sum of Multiple Contiguous, Non-overlapping Subarrays Calculation Algorithm",
+    "Printtokens"          : "Lexical analyzer print_tokens",
+    "Printtokens2"         : "Lexical analyzer print_tokens2",
+    "QuickSort"            : "Quick Sort Algorithm",
+    "rotate"               : "rotate function from scipy.ndimage",
+    "RSA"                  : "RSA Algorithm",
+    "schedule"             : "Priority scheduler",
+    "schedule2"            : "Priority scheduler",
+    "shortest_path"        : "shortest_path function from scipy.sparse.csgraph",
+    "Spwiki"               : "Shortest Path Distance Calculation Algorithm",
+    "Superstring"          : "The Shortest Superstring Identification Algorithm",
+    "SurroundedRegion"     : "Surrounded Region Identification Algorithm",
+    "TCAS"                 : "Traffic Collision Avoidance System",
+    "Trisquarej"           : "Triangle Area and Type Identification Algorithm",
+}
+# fmt:on
+
+
+#######################
+### Config template ###
+#######################
+CFGTMPL_CLOSE_GROUP = {
+    "agent_iden": {
+        "model": "gemini-2.5-pro",
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "external_corpus": "DO NOT EDIT HERE",
+        "prompts": {"system": "DO NOT EDIT HERE", "user": []},
+    },
+    "agent_distn": {
+        "model": "gemini-2.5-flash",
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "prompts": {"system": "DO NOT EDIT HERE", "user": []},
+    },
+    "agent_cali": [
+        {"model": "o3-2025-04-16", "temperature": 0.25, "top_p": 0.2, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+        {"model": "grok-3", "temperature": 0.5, "top_p": 0.4, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+        {"model": "claude-sonnet-4-20250514-thinking", "temperature": 0.75, "top_p": 0.6, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+        {"model": "mistral-medium-2505", "temperature": 1.0, "top_p": 0.8, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+    ],
+    "replacements": {"sut_name": "DO NOT EDIT HERE", "specification": "DO NOT EDIT HERE", "example_mr": "DO NOT EDIT HERE", "example_analysis": "DO NOT EDIT HERE"},
+    "existing_mrs": [],
+    "score_calc": "EXP",
+    "score_threshold": 0.6,
+    "max_MRs": 10,
+    "max_iter": 10,
+    "output": "DO NOT EDIT HERE",
+}
+
+CFGTMPL_OPEN_GROUP = {
+    "agent_iden": {
+        "model": "kimi-k2",
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "external_corpus": "DO NOT EDIT HERE",
+        "prompts": {"system": "DO NOT EDIT HERE", "user": []},
+    },
+    "agent_distn": {
+        "model": "deepseek-r1-0528",
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "prompts": {"system": "DO NOT EDIT HERE", "user": []},
+    },
+    "agent_cali": [
+        {"model": "deepseek-r1-0528", "temperature": 0.25, "top_p": 0.2, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+        {"model": "qwen3", "temperature": 0.5, "top_p": 0.4, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+        {"model": "minimax-m1", "temperature": 0.75, "top_p": 0.6, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+        {"model": "Llama-4-Maverick-17B-128E-Instruct", "temperature": 1.0, "top_p": 0.8, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+    ],
+    "replacements": {"sut_name": "DO NOT EDIT HERE", "specification": "DO NOT EDIT HERE", "example_mr": "DO NOT EDIT HERE", "example_analysis": "DO NOT EDIT HERE"},
+    "existing_mrs": [],
+    "score_calc": "EXP",
+    "score_threshold": 0.6,
+    "max_MRs": 10,
+    "max_iter": 10,
+    "output": "DO NOT EDIT HERE",
+}
+
+
+CFGTMPL_HYBRID_GROUP = {
+    "agent_iden": {
+        "model": "gemini-2.5-pro",
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "external_corpus": "DO NOT EDIT HERE",
+        "prompts": {"system": "DO NOT EDIT HERE", "user": []},
+    },
+    "agent_distn": {
+        "model": "qwen3",
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "prompts": {"system": "DO NOT EDIT HERE", "user": []},
+    },
+    "agent_cali": [
+        {"model": "o3", "temperature": 0.25, "top_p": 0.2, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+        {"model": "grok-3", "temperature": 0.5, "top_p": 0.4, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+        {"model": "kimi-k2", "temperature": 0.75, "top_p": 0.6, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+        {"model": "deepseek-r1-0528", "temperature": 1.0, "top_p": 0.8, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+    ],
+    "replacements": {"sut_name": "DO NOT EDIT HERE", "specification": "DO NOT EDIT HERE", "example_mr": "DO NOT EDIT HERE", "example_analysis": "DO NOT EDIT HERE"},
+    "existing_mrs": [],
+    "score_calc": "EXP",
+    "score_threshold": 0.6,
+    "max_MRs": 10,
+    "max_iter": 10,
+    "output": "DO NOT EDIT HERE",
+}
 
 
 ###############################
@@ -198,3 +336,48 @@ def remove_code_fences(code: str) -> str:
     while e >= 0 and not code_lst[e].startswith("```"):
         e -= 1
     return "\n".join(code_lst[s + 1 : e]).strip() if s < e else code
+
+
+def default_close_config(sut: str) -> dict:
+    """Get the default configuration for a close group experiment.
+
+    Parameters
+    ----------
+    sut : str
+        The name of the software under test.
+
+    Returns
+    -------
+    dict
+        The default configuration dictionary.
+    """
+    project_path = str(os.getenv("PROJECT"))
+    cfg = CFGTMPL_CLOSE_GROUP.copy()
+    cfg["agent_iden"]["external_corpus"] = os.path.join(project_path, "data", "corpus", sut + ".md")
+    cfg["agent_iden"]["prompts"]["system"] = os.path.join(project_path, "data", "prompts", "iden", "system.md")
+    cfg["agent_iden"]["prompts"]["user"] = [
+        os.path.join(project_path, "data", "prompts", "iden", "user1.md"),
+        os.path.join(project_path, "data", "prompts", "iden", "user2.md"),
+    ]
+    cfg["agent_iden"]["base_url"] = os.getenv("GOOGLE_OPENAI_API_BASE")
+    cfg["agent_iden"]["api_key"] = os.getenv("GOOGLE_OPENAI_API_KEY")
+    cfg["agent_distn"]["prompts"]["system"] = os.path.join(project_path, "data", "prompts", "distn", "system.md")
+    cfg["agent_distn"]["prompts"]["user"] = [
+        os.path.join(project_path, "data", "prompts", "distn", "user1.md"),
+    ]
+    cfg["agent_distn"]["base_url"] = os.getenv("GOOGLE_OPENAI_API_BASE")
+    cfg["agent_distn"]["api_key"] = os.getenv("GOOGLE_OPENAI_API_KEY")
+    for dt in cfg["agent_cali"]:
+        dt["prompts"]["system"] = os.path.join(project_path, "data", "prompts", "cali", "system.md")
+        dt["prompts"]["user"] = [
+            os.path.join(project_path, "data", "prompts", "cali", "user1.md"),
+            os.path.join(project_path, "data", "prompts", "cali", "user2.md"),
+        ]
+    cfg["replacements"]["specification"] = os.path.join(project_path, "data", "specs", sut + ".md")
+    cfg["replacements"]["example_mr"] = os.path.join(project_path, "data", "examples-MRs", sut + ".md")
+    cfg["replacements"]["example_analysis"] = os.path.join(project_path, "data", "examples-analysis", sut + ".md")
+    cfg["output"] = os.path.join(project_path, "workdir", "default", sut)
+    return cfg
+
+
+# TODO: Add default open group & hybrid group

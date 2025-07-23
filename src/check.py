@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-07-20 02:34:17
 LastEditors  : Radon
-LastEditTime : 2025-07-21 17:05:21
+LastEditTime : 2025-07-23 15:14:24
 Description  : Check the quality of configs in $PROJECT/configs.
 """
 
@@ -22,7 +22,7 @@ ESTRGNUM = 0b00000100  # max_MRs is too small (< 5) or too large (> 40)
 EEXISTMR = 0b00001000  # existing_mrs is not empty or not a list
 EEXTRDEP = 0b00010000  # External corpus, specification, example_mr, and example_analysis are not consistent
 ESUTNAME = 0b00100000  # sut_name is not consistent with external corpus, specification, etc.
-EUNKWSUT = 0b01000000  # sut_name is not in the SUT_NAMES dictionary
+EUNKWSUT = 0b01000000  # sut_name is not in the SUT_DICT dictionary
 
 ERROR_MESSAGES = {
     EAPILEAK: "API key or base URL is leaked",
@@ -31,51 +31,8 @@ ERROR_MESSAGES = {
     EEXISTMR: "existing_mrs is not empty or not a list",
     EEXTRDEP: "External corpus, specification, example_mr, and example_analysis are not consistent",
     ESUTNAME: "sut_name is not consistent with external corpus, specification, etc.",
-    EUNKWSUT: "sut_name is not in the SUT_NAMES dictionary",
+    EUNKWSUT: "sut_name is not in the SUT_DICT dictionary",
 }
-
-# Dictionary to map sut abbreviations to full names
-# fmt:off
-SUT_NAMES = {
-    "ACMS"                 : "Aviation Consignment Management System",
-    "Boyer"                : "Boyer-Moore algorithm",
-    "Bsearch1"             : "Get Range Algorithm",
-    "Bsearch2"             : "Binary Search Algorithm",
-    "ClosestPair"          : "Closest Distance Algorithm",
-    "CUBS"                 : "China Unicom Billing System",
-    "Determinant1"         : "Michael Thomas Flanagan's Library",
-    "DistinctSubsequence"  : "Number of Distinct Subsequences Calculation Algorithm",
-    "Editingdistance"      : "Editing Distance Calculation Algorithm",
-    "ERS"                  : "Expense Reimbursement System",
-    "f_oneway"             : "One-way ANOVA",
-    "FastJson"             : "FastJson",
-    "FirstMissingPositive" : "Smallest Positive Integer Finding Algorithm",
-    "grep"                 : "grep",
-    "HeapSort"             : "Heap Sort Algorithm",
-    "InterleavingString"   : "Interleaved String Checking Algorithm",
-    "JAMA"                 : "Java Matrix Package JAMA",
-    "Jodatime"             : "Jodatime",
-    "Klp"                  : "Key-lock Problem",
-    "Lucene"               : "Text Search Engine Lucene",
-    "MaxRectangle"         : "Largest Area of Rectangle Calculation Algorithm",
-    "Maxsub"               : "Maximum Subarray Sum Calculation Algorithm",
-    "MOS"                  : "Meal Ordering System",
-    "Multi-MAXSUM"         : "Maximum Sum of Multiple Contiguous, Non-overlapping Subarrays Calculation Algorithm",
-    "Printtokens"          : "Lexical analyzer print_tokens",
-    "Printtokens2"         : "Lexical analyzer print_tokens2",
-    "QuickSort"            : "Quick Sort Algorithm",
-    "rotate"               : "rotate function from scipy.ndimage",
-    "RSA"                  : "RSA Algorithm",
-    "schedule"             : "Priority scheduler",
-    "schedule2"            : "Priority scheduler",
-    "shortest_path"        : "shortest_path function from scipy.sparse.csgraph",
-    "Spwiki"               : "Shortest Path Distance Calculation Algorithm",
-    "Superstring"          : "The Shortest Superstring Identification Algorithm",
-    "SurroundedRegion"     : "Surrounded Region Identification Algorithm",
-    "TCAS"                 : "Traffic Collision Avoidance System",
-    "Trisquarej"           : "Triangle Area and Type Identification Algorithm",
-}
-# fmt:on
 
 
 def check(cfg: dict) -> int:
@@ -125,8 +82,8 @@ def check(cfg: dict) -> int:
         res |= EEXTRDEP
     elif len(external_deps) == 1:
         abbr = os.path.splitext(next(iter(external_deps)))[0]
-        res |= ESUTNAME if sut_name != SUT_NAMES.get(abbr) else 0
-        res |= EUNKWSUT if abbr not in SUT_NAMES else 0
+        res |= ESUTNAME if sut_name != SUT_DICT.get(abbr) else 0
+        res |= EUNKWSUT if abbr not in SUT_DICT else 0
 
     return res
 

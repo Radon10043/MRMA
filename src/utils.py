@@ -2,12 +2,13 @@
 Author       : Radon
 Date         : 2025-06-27 16:42:43
 LastEditors  : Radon
-LastEditTime : 2025-07-23 17:26:47
+LastEditTime : 2025-07-23 19:51:28
 Description  : Utility functions
 """
 
 import os
 import time
+from copy import deepcopy
 
 import marko
 from langchain.chat_models import init_chat_model
@@ -352,7 +353,7 @@ def default_close_config(sut: str) -> dict:
         The default configuration dictionary.
     """
     project_path = str(os.getenv("PROJECT"))
-    cfg = CFGTMPL_CLOSE_GROUP.copy()
+    cfg = deepcopy(CFGTMPL_CLOSE_GROUP)
     cfg["agent_iden"]["external_corpus"] = os.path.join(project_path, "data", "corpus", sut + ".md")
     cfg["agent_iden"]["prompts"]["system"] = os.path.join(project_path, "data", "prompts", "iden", "system.md")
     cfg["agent_iden"]["prompts"]["user"] = [
@@ -376,10 +377,12 @@ def default_close_config(sut: str) -> dict:
         if dt["model"] == "mistral-medium-2505":
             dt["base_url"] = os.getenv("MISTRAL_OPENAI_API_BASE")
             dt["api_key"] = os.getenv("MISTRAL_OPENAI_API_KEY")
+    cfg["replacements"]["sut_name"] = SUT_DICT[sut]
     cfg["replacements"]["specification"] = os.path.join(project_path, "data", "specs", sut + ".md")
-    cfg["replacements"]["example_mr"] = os.path.join(project_path, "data", "examples-MRs", sut + ".md")
-    cfg["replacements"]["example_analysis"] = os.path.join(project_path, "data", "examples-analysis", sut + ".md")
+    cfg["replacements"]["example_mr"] = os.path.join(project_path, "data", "example-MRs", sut + ".md")
+    cfg["replacements"]["example_analysis"] = os.path.join(project_path, "data", "example-analysis", sut + ".md")
     cfg["output"] = os.path.join(project_path, "workdir", "default", sut)
+    cfg["existing_mrs"] = list()
     return cfg
 
 

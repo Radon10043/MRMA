@@ -8,10 +8,11 @@ import src.gen_candidate
 from .utils import *
 
 
-def RQ6(args):
+def RQ6(args: argparse.Namespace):
     project_path = str(os.getenv("PROJECT"))
     sut_root = os.path.join(project_path, "Empirical-Study-LLM-MR", "software-under-test")
     suts = [d for d in os.listdir(sut_root) if os.path.isdir(os.path.join(sut_root, d))]
+    suts.sort()
     for sut in suts:
         for temperature in [0.0, 0.5, 1.0, 1.5, 2.0]:
             for top_p in [0.0, 0.5, 1.0]:

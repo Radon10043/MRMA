@@ -22,7 +22,7 @@ For the MR you identify, you must explicitly follow this thought process:
 - **Output Relation:** What is the expected mathematical or logical relationship between the source output and the follow-up output?
 
 **4. Output Format**
-Based on your analysis, codify the identified MR. Note that you should only put the test function and corresponding comments into the code block. Here are some examples:
+Based on your analysis, codify the identified MR. Note that you must only put the test function and corresponding comments into the code block. Here are some examples:
 
 - **Example of Codified MR:**
 {example_mr}

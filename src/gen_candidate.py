@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-07-23 16:42:08
+LastEditTime : 2025-07-24 14:29:34
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -331,9 +331,10 @@ def main(usr_config: dict):
 
     # candidates store the existing metamorphic relation candidates or existing metamorphic relations
     candidates = list()
+    lang = get_first_code_block(replacements["example_mr"]).split("\n")[0].strip("```").strip()
+    lang = "py" if lang == "python" else lang
     if usr_config.get("existing_mrs") is not None:
         for f in usr_config["existing_mrs"]:
-            lang = os.path.splitext(f)[-1].strip(".")
             mr = Path(f).read_text(encoding="utf-8")
             candidates.append(f"```{lang}\n{mr}\n```")
 
@@ -374,9 +375,14 @@ def main(usr_config: dict):
                 act = "generate" if index == 0 else "fix"
                 ACTF(f"Prompting identification agent to {act} a metamorphic relation candidate ...")
                 response = identify(agent_iden, index, replacements)
+                if len(response) == 0:
+                    FATAL("Failed to generate response from identification agent!")
                 candidate = get_first_code_block(response)
+                # TODO: Sometime llm may not put the codified MR candidate in the code block.
+                # We brute-force assign response to the candidate and surround it with a code
+                # fence. This is a bad idea but I haven't thought of a better solution yet.
                 if len(candidate) == 0:
-                    FATAL("Failed to generate codified metamorphic relation candidate!")
+                    candidate = f"```{lang}\n{response}\n```"
                 ACTF("Prompting calibration agent(s) to verify the MR candidate ...")
                 cali_res_lst = calibrate_parallel(agent_cali, index, replacements, candidate)
             except BaseException as e:

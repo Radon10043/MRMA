@@ -32,6 +32,8 @@ def RQ6(args: argparse.Namespace):
                     if max_MRs <= 0:
                         WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
                         continue
+                cfg["existing_mrs"] = existing_mrs
+                cfg["max_MRs"] = max_MRs
                 cfg["output"] = out_dir
                 src.gen_candidate.main(cfg)
 

@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-27 16:42:43
 LastEditors  : Radon
-LastEditTime : 2025-07-23 19:51:28
+LastEditTime : 2025-07-24 10:26:07
 Description  : Utility functions
 """
 
@@ -107,9 +107,9 @@ CFGTMPL_CLOSE_GROUP = {
     },
     "agent_cali": [
         {"model": "o3-2025-04-16", "temperature": 0.25, "top_p": 0.2, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
-        {"model": "grok-3", "temperature": 0.5, "top_p": 0.4, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
-        {"model": "claude-sonnet-4-20250514-thinking", "temperature": 0.75, "top_p": 0.6, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
-        {"model": "mistral-medium-2505", "temperature": 1.0, "top_p": 0.8, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+        {"model": "chatgpt-4o-latest", "temperature": 0.5, "top_p": 0.4, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+        {"model": "grok-3", "temperature": 0.75, "top_p": 0.6, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+        {"model": "claude-sonnet-4-20250514-thinking", "temperature": 1.0, "top_p": 0.8, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
     ],
     "replacements": {"sut_name": "DO NOT EDIT HERE", "specification": "DO NOT EDIT HERE", "example_mr": "DO NOT EDIT HERE", "example_analysis": "DO NOT EDIT HERE"},
     "existing_mrs": [],
@@ -374,9 +374,6 @@ def default_close_config(sut: str) -> dict:
             os.path.join(project_path, "data", "prompts", "cali", "user1.md"),
             os.path.join(project_path, "data", "prompts", "cali", "user2.md"),
         ]
-        if dt["model"] == "mistral-medium-2505":
-            dt["base_url"] = os.getenv("MISTRAL_OPENAI_API_BASE")
-            dt["api_key"] = os.getenv("MISTRAL_OPENAI_API_KEY")
     cfg["replacements"]["sut_name"] = SUT_DICT[sut]
     cfg["replacements"]["specification"] = os.path.join(project_path, "data", "specs", sut + ".md")
     cfg["replacements"]["example_mr"] = os.path.join(project_path, "data", "example-MRs", sut + ".md")

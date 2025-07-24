@@ -21,9 +21,17 @@ def RQ6(args: argparse.Namespace):
                 cfg["agent_iden"]["temperature"] = temperature
                 cfg["agent_iden"]["top_p"] = top_p
                 out_dir = os.path.join(project_path, "workdir", "RQ6", f"close-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
-                if os.path.exists(out_dir) and len(os.listdir(out_dir)) >= 10:
-                    WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
-                    continue
+                max_MRs = 10
+                existing_mrs = list()
+                if os.path.exists(out_dir):
+                    for root, _, files in os.walk(out_dir):
+                        for file in files:
+                            if file.startswith("mr_candidate"):
+                                max_MRs -= 1
+                                existing_mrs.append(os.path.abspath(os.path.join(root, file)))
+                    if max_MRs <= 0:
+                        WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
+                        continue
                 cfg["output"] = out_dir
                 src.gen_candidate.main(cfg)
 

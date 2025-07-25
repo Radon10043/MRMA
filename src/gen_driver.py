@@ -2,13 +2,14 @@
 Author       : Radon
 Date         : 2025-07-10 17:43:16
 LastEditors  : Radon
-LastEditTime : 2025-07-21 17:05:31
+LastEditTime : 2025-07-25 17:45:05
 Description  : Generate test driver for encoded-MRCs
 """
 
 import argparse
 import json
 import os
+import random
 import shutil
 import subprocess
 import uuid
@@ -301,10 +302,17 @@ def main(user_config: dict):
         i = min(index, len(usr_pts) - 1)  # Use the last prompt if index exceeds available prompts
         pt = PromptTemplate.from_file(usr_pts[i])
         prompt = pt.invoke(driver.replacements).to_string()
-        response = agent.instance.invoke(
-            {"messages": [{"role": "user", "content": prompt}]},
-            config=agent.runnable_config,
-        )
+        try:
+            response = agent.instance.invoke(
+                {"messages": [{"role": "user", "content": prompt}]},
+                config=agent.runnable_config,
+            )
+        except BaseException as e:
+            t = random.randint(1, 60)  # Have a break :)
+            WARNF("ERROR: " + repr(e))
+            WARNF(f"Have a break for {t} seconds ...")
+            time.sleep(t)
+            continue
         compl_code = get_first_code_block(response["messages"][-1].content)
         compl_code = remove_code_fences(compl_code)
         gen_succ, error_messages = driver.build(compl_code)

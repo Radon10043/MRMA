@@ -26,8 +26,8 @@ RUN mkdir tools && pushd tools && \
     cmake .. && make && make install && \
     popd && popd && rm v1.14.0.tar.gz
 
-# Install jdk-24
+# Install jdk-24.0.1
 RUN pushd tools && \
-    wget https://download.oracle.com/java/24/latest/jdk-24_linux-x64_bin.tar.gz && \
-    tar xzvf jdk-24_linux-x64_bin.tar.gz && \
-    rm jdk-24_linux-x64_bin.tar.gz
+    wget https://download.oracle.com/java/24/archive/jdk-24.0.1_linux-x64_bin.tar.gz && \
+    tar xzvf jdk-24.0.1_linux-x64_bin.tar.gz && \
+    rm jdk-24.0.1_linux-x64_bin.tar.gz

@@ -29,12 +29,12 @@ PYTHON ?=
 # SIR test set configurations
 SIR_CC := gcc
 SIR_CFLAGS := -std=c17 -static -O2
-PT_DIR := $(PROJECT)/software-under-test/Printtokens/src
-PT2_DIR := $(PROJECT)/software-under-test/Printtokens2/src
-SCD_DIR := $(PROJECT)/software-under-test/schedule/src
-SCD2_DIR := $(PROJECT)/software-under-test/schedule2/src
-GREP_DIR := $(PROJECT)/software-under-test/grep/src
-TCAS_DIR := $(PROJECT)/software-under-test/TCAS/src
+PT_DIR := $(PROJECT)/Empirical-Study-LLM-MR/software-under-test/Printtokens/src
+PT2_DIR := $(PROJECT)/Empirical-Study-LLM-MR/software-under-test/Printtokens2/src
+SCD_DIR := $(PROJECT)/Empirical-Study-LLM-MR/software-under-test/schedule/src
+SCD2_DIR := $(PROJECT)/Empirical-Study-LLM-MR/software-under-test/schedule2/src
+GREP_DIR := $(PROJECT)/Empirical-Study-LLM-MR/software-under-test/grep/src
+TCAS_DIR := $(PROJECT)/Empirical-Study-LLM-MR/software-under-test/TCAS/src
 
 .PHONY: all clean build_cpp build_java build_python build_sir build_printtokens build_printtokens2 build_schedule build_schedule2 build_grep build_tcas run_cpp run_java run_python download patch
 

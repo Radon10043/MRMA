@@ -1,5 +1,8 @@
 # MR-CoT-RAG
 
+> [!NOTE]
+> Run `make download build_sir patch_sut` first.
+
 gen_driver.json:
 
 - candidate: MR candidate file path.

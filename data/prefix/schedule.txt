@@ -1,4 +1,4 @@
-SCHEDULE_PATH = $PROJECT/software-under-test/schedule/src/schedule.out
+SCHEDULE_PATH = $PROJECT/Empirical-Study-LLM-MR/software-under-test/schedule/src/schedule.out
 SCHEDULE_OPERATIONS = {
     "NEW_JOB"       : "1",
     "UPGRADE_PRIO"  : "2",

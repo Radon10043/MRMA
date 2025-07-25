@@ -1,4 +1,4 @@
-TCAS_PAT = $PROJECT/software-under-test/TCAS/src/tcas.out
+TCAS_PAT = $PROJECT/Empirical-Study-LLM-MR/software-under-test/TCAS/src/tcas.out
 INDEX = {
     "Cur_Vertical_Sep"          : 0,
     "High_Confidence"           : 1,

@@ -13,7 +13,7 @@
         }
     },
     "build": {
-        "srcdir": "$PROJECT/software-under-test/Jodatime/org",
+        "srcdir": "$PROJECT/Empirical-Study-LLM-MR/software-under-test/Jodatime/org",
         "prefix": "import org.joda.time.DateTime;\n"
     },
     "max_iter": 10

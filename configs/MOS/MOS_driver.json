@@ -12,7 +12,7 @@
             ]
         },
         "build": {
-            "srcdir": "$PROJECT/software-under-test/MOS/src",
+            "srcdir": "$PROJECT/Empirical-Study-LLM-MR/software-under-test/MOS/src",
             "prefix": "import src.MSR;\nimport src.MealOrderingSystem;\n"
         }
     },

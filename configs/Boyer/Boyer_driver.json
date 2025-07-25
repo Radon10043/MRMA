@@ -13,7 +13,7 @@
         }
     },
     "build": {
-        "srcdir": "$PROJECT/software-under-test/Boyer/src",
+        "srcdir": "$PROJECT/Empirical-Study-LLM-MR/software-under-test/Boyer/src",
         "prefix": "import src.Boyer;\n"
     },
     "max_iter": 10

@@ -12,7 +12,7 @@
             ]
         },
         "build": {
-            "srcdir": "$PROJECT/software-under-test/Superstring/",
+            "srcdir": "$PROJECT/Empirical-Study-LLM-MR/software-under-test/Superstring/",
             "prefix": "import src.Superstring;\n"
         }
     },

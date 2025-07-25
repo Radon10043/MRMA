@@ -13,7 +13,7 @@
         }
     },
     "build": {
-        "srcdir": "$PROJECT/software-under-test/ERS/src",
+        "srcdir": "$PROJECT/Empirical-Study-LLM-MR/software-under-test/ERS/src",
         "prefix": "import src.ExpenseReimbursementSystem;\n"
     },
     "max_iter": 10

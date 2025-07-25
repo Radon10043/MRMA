@@ -13,7 +13,7 @@
         }
     },
     "build": {
-        "srcdir": "$PROJECT/software-under-test/Lucene/org",
+        "srcdir": "$PROJECT/Empirical-Study-LLM-MR/software-under-test/Lucene/org",
         "prefix": "import org.apache.lucene.search.Query;\n"
     },
     "max_iter": 10

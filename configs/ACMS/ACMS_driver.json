@@ -13,7 +13,7 @@
         }
     },
     "build": {
-        "srcdir": "$PROJECT/software-under-test/ACMS/src",
+        "srcdir": "$PROJECT/Empirical-Study-LLM-MR/software-under-test/ACMS/src",
         "prefix": "import src.AirlinesBaggageBillingService;\n"
     },
     "max_iter": 10

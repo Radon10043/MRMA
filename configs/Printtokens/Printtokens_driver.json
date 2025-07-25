@@ -13,7 +13,7 @@
         }
     },
     "build": {
-        "prefix": "PRINT_TOKENS_PATH=\"$PROJECT/software-under-test/Printtokens/src/print_tokens.out\""
+        "prefix": "PRINT_TOKENS_PATH=\"$PROJECT/Empirical-Study-LLM-MR/software-under-test/Printtokens/src/print_tokens.out\""
     },
     "max_iter": 10
 }

@@ -13,7 +13,7 @@
         }
     },
     "build": {
-        "prefix": "GREP_PATH=\"$PROJECT/software-under-test/grep/src/grep-3.11/obj-temp/src/grep\""
+        "prefix": "GREP_PATH=\"$PROJECT/Empirical-Study-LLM-MR/software-under-test/grep/src/grep-3.11/obj-temp/src/grep\""
     },
     "max_iter": 10
 }

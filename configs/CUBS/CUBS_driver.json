@@ -13,7 +13,7 @@
         }
     },
     "build": {
-        "srcdir": "$PROJECT/software-under-test/CUBS/src",
+        "srcdir": "$PROJECT/Empirical-Study-LLM-MR/software-under-test/CUBS/src",
         "prefix": "import src.BillCalculation;\n"
     },
     "max_iter": 10

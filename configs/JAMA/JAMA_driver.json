@@ -13,7 +13,7 @@
         }
     },
     "build": {
-        "srcdir": "$PROJECT/software-under-test/JAMA/Jama",
+        "srcdir": "$PROJECT/Empirical-Study-LLM-MR/software-under-test/JAMA/Jama",
         "prefix": "import Jama.Matrix;\n"
     },
     "max_iter": 10

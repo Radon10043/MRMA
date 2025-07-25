@@ -13,7 +13,7 @@
         }
     },
     "build": {
-        "prefix": "#include \"$PROJECT/software-under-test/Klp/src/function.h\""
+        "prefix": "#include \"$PROJECT/Empirical-Study-LLM-MR/software-under-test/Klp/src/function.h\""
     },
     "max_iter": 10
 }

@@ -12,7 +12,7 @@
             ]
         },
         "build": {
-            "srcdir": "$PROJECT/software-under-test/Maxsub/src",
+            "srcdir": "$PROJECT/Empirical-Study-LLM-MR/software-under-test/Maxsub/src",
             "prefix": "import src.Maxsub;\n"
         }
     },

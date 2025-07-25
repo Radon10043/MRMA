@@ -13,7 +13,7 @@
         }
     },
     "build": {
-        "srcdir": "$PROJECT/software-under-test/Determinant1/flanagan",
+        "srcdir": "$PROJECT/Empirical-Study-LLM-MR/software-under-test/Determinant1/flanagan",
         "prefix": "import flanagan.math.Matrix;\n"
     },
     "max_iter": 10

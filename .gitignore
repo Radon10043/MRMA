@@ -276,5 +276,4 @@ pyrightconfig.json
 .vscode/*
 !.vscode/settings.json
 workdir/*
-software-under-test/grep/src/*
-!software-under-test/grep/src/build.sh
+tmp/*

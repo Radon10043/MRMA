@@ -2,10 +2,9 @@ include .env
 export
 
 # General configurations
-SRC ?=
 BIN := $(basename $(SRC)).out
 EXT := $(suffix $(SRC))
-REP ?= 5
+REP ?= 20
 TIMEOUT ?= 5
 
 # cpp compile configurations
@@ -15,7 +14,6 @@ INCLUDES := -isystem $(GTEST_DIR)/googletest/include
 LIBS := $(GTEST_DIR)/build/lib/libgtest.a $(GTEST_DIR)/build/lib/libgtest_main.a
 
 # java compile configurations
-JAVAPROJ ?=
 JAVA := java
 JAVAC := javac
 JAVAFLAGS := -cp "$(JAVAPROJ)/bin:$(JAVAPROJ)/lib/*" org.junit.platform.console.ConsoleLauncher -disable-ansi-colors --scan-class-path
@@ -24,7 +22,7 @@ JAVATEST := $(JAVAPROJ)/test/DriverTest.java
 JAVASRCDIR := $(JAVAPROJ)/src
 
 # python configurations
-PYTHON ?=
+# Not yet :)
 
 # SIR test set configurations
 SIR_CC := gcc
@@ -39,13 +37,13 @@ TCAS_DIR := $(PROJECT)/Empirical-Study-LLM-MR/software-under-test/TCAS/src
 .PHONY: all clean build_cpp build_java build_python build_sir build_printtokens build_printtokens2 build_schedule build_schedule2 build_grep build_tcas run_cpp run_java run_python download patch
 
 build_cpp:
-ifneq ($(origin SRC), command line)
+ifndef SRC
 	$(error SRC is not set, please provide a source file to compile (e.g. make SRC=your_file.cpp build_cpp))
 endif
 	$(CXX) $(SRC) $(CXXFLAGS) -o $(BIN) $(INCLUDES) $(LIBS)
 
 build_java:
-ifneq ($(origin JAVAPROJ), command line)
+ifndef JAVAPROJ
 	$(error JAVAPROJ is not set, please provide a source file to compile (e.g. make JAVAPROJ=./test_driver_java build_java))
 endif
 	find $(JAVASRCDIR) -name "*.java" | xargs $(JAVAC) $(JAVACFLAGS) $(JAVATEST) 2> /tmp/build_java.log
@@ -89,7 +87,7 @@ build_sir: build_printtokens build_printtokens2 build_schedule build_schedule2 b
 	@echo "Finished building all SIR programs."
 
 run_cpp:
-ifneq ($(origin BIN), command line)
+ifndef BIN
 	$(error BIN is not set, please provide a source file to compile (e.g. make BIN=your_file.out run_cpp))
 endif
 	@echo "--- Starting Repetitive Run ---"
@@ -99,7 +97,7 @@ endif
 	@echo "-------------------------------"
 	@for i in $$(seq $(REP)); do \
 		echo -n "Running iteration $$i ..."; \
-		if timeout $(TIMEOUT) ./$(BIN) > /dev/null 2>&1; then \
+		if timeout $(TIMEOUT) $(BIN) > /dev/null 2>&1; then \
 			echo " OK"; \
 		else \
 			exit_code=$$?; \
@@ -108,14 +106,15 @@ endif
 			else \
 				echo " FAILED! Stopping execution."; \
 			fi; \
-			exit 1; \
+			echo "-------------------------------";\
+			exit $$exit_code; \
 		fi; \
 	done
 	@echo "-------------------------------"
 	@echo "Successfully completed all $(REP) runs."
 
 run_java:
-ifneq ($(origin JAVAPROJ), command line)
+ifndef JAVAPROJ
 	$(error JAVAPROJ is not set, please provide a source file to compile (e.g. make JAVAPROJ=./test_driver_java run_java))
 endif
 	@echo "--- Starting Repetitive Run ---"
@@ -134,6 +133,7 @@ endif
 			else \
 				echo " FAILED! Stopping execution."; \
 			fi; \
+			echo "-------------------------------";\
 			exit 1; \
 		fi; \
 	done
@@ -141,7 +141,7 @@ endif
 	@echo "Successfully completed all $(REP) runs."
 
 run_python:
-ifneq ($(origin PYTHON), command line)
+ifndef PYTHON
 	$(error PYTHON is not set, please provide a source file to run (e.g. make PYTHON=your_file.py run_python))
 endif
 	@echo "--- Starting Repetitive Run ---"
@@ -160,6 +160,7 @@ endif
 			else \
 				echo " FAILED! Stopping execution."; \
 			fi; \
+			echo "-------------------------------";\
 			exit 1; \
 		fi; \
 	done

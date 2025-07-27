@@ -17,8 +17,8 @@ def RQ6(args: argparse.Namespace):
     suts = [d for d in os.listdir(sut_root) if os.path.isdir(os.path.join(sut_root, d))]
     suts.sort()
     for sut in suts:
-        for temperature in [1.0]:
-            for top_p in [1.0]:
+        for temperature in [0.5, 1.0, 1.5]:
+            for top_p in [0.5, 1.0]:
                 SAYF(f"==================== [SUT: {sut} / temperature: {temperature} / top_p: {top_p}] ====================\n")
                 cfg = default_close_config(sut)
                 cfg["agent_iden"]["temperature"] = temperature

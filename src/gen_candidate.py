@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-07-24 14:29:34
+LastEditTime : 2025-07-29 16:36:58
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -385,27 +385,27 @@ def main(usr_config: dict):
                     candidate = f"```{lang}\n{response}\n```"
                 ACTF("Prompting calibration agent(s) to verify the MR candidate ...")
                 cali_res_lst = calibrate_parallel(agent_cali, index, replacements, candidate)
+
+                # Calculate confidence score of calibration
+                score = calculate_score(cali_res_lst, calc_method)
+
+                # If confidence score less than threshold, collect & distill the error messages,
+                # else, update existing MR candidates and open a new chat to generate a new MR candidate
+                if score < score_threshold:
+                    WARNF(f"Confidence score is lower than threshold ({score} < {score_threshold}), distilling error messages ...")
+                    distn_err_msg = distill(agent_distn, index, cali_res_lst)
+                    replacements["distn_error_messages"] = distn_err_msg
+                else:
+                    OKF(f"Confidence score is satisfied ({score} >= {score_threshold}), adding to candidate list ...")
+                    gen_succ = True
+                    break
+                index += 1
             except BaseException as e:
                 t = random.randint(1, 60)   # Have a break :)
                 WARNF("ERROR: " + repr(e))
                 WARNF(f"Have a break for ({t} seconds) ...")
                 time.sleep(t)
                 continue
-
-            # Calculate confidence score of calibration
-            score = calculate_score(cali_res_lst, calc_method)
-
-            # If confidence score less than threshold, collect & distill the error messages,
-            # else, update existing MR candidates and open a new chat to generate a new MR candidate
-            if score < score_threshold:
-                WARNF(f"Confidence score is lower than threshold ({score} < {score_threshold}), distilling error messages ...")
-                distn_err_msg = distill(agent_distn, index, cali_res_lst)
-                replacements["distn_error_messages"] = distn_err_msg
-            else:
-                OKF(f"Confidence score is satisfied ({score} >= {score_threshold}), adding to candidate list ...")
-                gen_succ = True
-                break
-            index += 1
 
         # Identification is done, we can now create the output directory
         os.makedirs(usr_config["output"], exist_ok=True)

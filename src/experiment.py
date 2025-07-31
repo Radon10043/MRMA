@@ -1,7 +1,11 @@
 import argparse
 import json
 import os
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from pathlib import Path
+import sys
+import traceback
 
 from dotenv import load_dotenv
 
@@ -9,6 +13,45 @@ import src.gen_candidate
 import src.gen_driver
 
 from .utils import *
+
+
+def send_email(subject: str, body: str, receiver: str):
+    """Send an email notification.
+
+    Parameters
+    ----------
+    subject : str
+        Subject of the email
+    body : str
+        Body content of the email
+    receiver : str
+        Email address to send the notification to
+    """
+    msg = MIMEMultipart()
+    sender = os.getenv("EMAIL_SENDER")
+    passwd = os.getenv("EMAIL_PASSWORD")
+    host = os.getenv("EMAIL_HOST")
+    port = os.getenv("EMAIL_PORT")
+    if sender is None:
+        FATAL("Email sender is not configured in .env file.")
+    elif passwd is None:
+        FATAL("Email password is not configured in .env file.")
+    elif host is None:
+        FATAL("Email host is not configured in .env file.")
+    elif port is None:
+        FATAL("Email port is not configured in .env file.")
+    msg["From"] = sender  # type: ignore
+    msg["To"] = receiver
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "plain"))
+    try:
+        server = smtplib.SMTP(host, port)  # type: ignore
+        server.starttls()
+        server.login(os.getenv("EMAIL_SENDER"), os.getenv("EMAIL_PASSWORD"))  # type: ignore
+        server.sendmail(msg["From"], msg["To"], msg.as_string())
+        server.quit()
+    except Exception as e:
+        FATAL(f"Failed to send email: {e}")
 
 
 def RQ6(args: argparse.Namespace):
@@ -70,7 +113,8 @@ def driver(args: argparse.Namespace):
 
 if __name__ == "__main__":
     load_dotenv()
-    parser = argparse.ArgumentParser(description="Run the experiment.")
+    parser = argparse.ArgumentParser(description="MR-CoT-RAG Experiment Runner")
+    parser.add_argument("--email", type=str, default="", help="Email address to send notifications to")
     subparsers = parser.add_subparsers(title="RQx", required=True)
 
     rq6_parser = subparsers.add_parser("RQ6", help="Run RQ6 experiment")
@@ -81,4 +125,20 @@ if __name__ == "__main__":
     driver_parser.set_defaults(func=driver)
 
     args = parser.parse_args()
-    args.func(args)
+    try:
+        args.func(args)
+        if args.email:
+            subject = "MR-CoT-RAG Experiment Success"
+            body = f"Hi,\n\nThe experiment completed successfully.\n\n"
+            body += "Program args: " + " ".join(sys.argv) + "\n\n"
+            body += "Best regards,\nMR-CoT-RAG Experiment Runner"
+            send_email(subject, body, args.email)
+    except BaseException as e:
+        traceback.print_exc()
+        if args.email:
+            subject = "MR-CoT-RAG Experiment Failed"
+            body = f"Hi,\n\nAn error occurred during the experiment:\n\n{e}\n\n"
+            body += f"Traceback:\n{traceback.format_exc()}\n\n"
+            body += "Program args: " + " ".join(sys.argv) + "\n\n"
+            body += "\n\nPlease check the logs for more details.\n\nBest regards,\nMR-CoT-RAG Experiment Runner"
+            send_email(subject, body, args.email)

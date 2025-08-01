@@ -128,7 +128,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     try:
         args.func(args)
-        if args.email:
+        if len(args.email) > 0:
             subject = "MR-CoT-RAG Experiment Success"
             body = f"Hi,\n\nThe experiment completed successfully.\n\n"
             body += "Program args: " + " ".join(sys.argv) + "\n\n"
@@ -136,7 +136,7 @@ if __name__ == "__main__":
             send_email(subject, body, args.email)
     except BaseException as e:
         traceback.print_exc()
-        if args.email:
+        if len(args.email) > 0:
             subject = "MR-CoT-RAG Experiment Failed"
             body = f"Hi,\n\nAn error occurred during the experiment:\n\n{e}\n\n"
             body += f"Traceback:\n{traceback.format_exc()}\n\n"

@@ -6,6 +6,7 @@ from email.mime.text import MIMEText
 from pathlib import Path
 import sys
 import traceback
+import smtplib
 
 from dotenv import load_dotenv
 

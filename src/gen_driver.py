@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-07-10 17:43:16
 LastEditors  : Radon
-LastEditTime : 2025-07-25 17:45:05
+LastEditTime : 2025-08-02 12:56:48
 Description  : Generate test driver for encoded-MRCs
 """
 
@@ -261,6 +261,43 @@ class DriverPython(Driver):
         return True, str()
 
 
+def perf_coding(agent: Agent, prompt: str) -> str:
+    """Prompt the agent to generate code based on the provided prompt.
+    If generation fails, retry up to 3 times with a random delay.
+
+    Parameters
+    ----------
+    agent : Agent
+        Agent to generate code.
+    prompt : str
+        Prompt for code generation.
+
+    Returns
+    -------
+    str
+        Response content from the agent.
+    """
+    retry = 3
+    err = str()
+    while retry > 0:
+        try:
+            response = agent.instance.invoke(
+                {"messages": [{"role": "user", "content": prompt}]},
+                config=agent.runnable_config,
+            )
+            break
+        except BaseException as e:
+            retry -= 1
+            t = random.randint(1, 60)
+            err = repr(e)
+            WARNF(f"ERROR: {err}")
+            WARNF(f"Have a break for {t} seconds ... ({retry} attempts left)")
+            time.sleep(t)  # Have a break :)
+    if retry < 0:
+        FATAL(f"Failed to prompt agent for driver generation after {retry} attempts: {err}")
+    return response["messages"][-1].content
+
+
 def main(user_config: dict):
     """Generate a test driver based on the provided user configuration.
 
@@ -302,18 +339,8 @@ def main(user_config: dict):
         i = min(index, len(usr_pts) - 1)  # Use the last prompt if index exceeds available prompts
         pt = PromptTemplate.from_file(usr_pts[i])
         prompt = pt.invoke(driver.replacements).to_string()
-        try:
-            response = agent.instance.invoke(
-                {"messages": [{"role": "user", "content": prompt}]},
-                config=agent.runnable_config,
-            )
-        except BaseException as e:
-            t = random.randint(1, 60)  # Have a break :)
-            WARNF("ERROR: " + repr(e))
-            WARNF(f"Have a break for {t} seconds ...")
-            time.sleep(t)
-            continue
-        compl_code = get_first_code_block(response["messages"][-1].content)
+        response = perf_coding(agent, prompt)
+        compl_code = get_first_code_block(response)
         compl_code = remove_code_fences(compl_code)
         gen_succ, error_messages = driver.build(compl_code)
         driver.update_replacements("error_messages", error_messages)

@@ -60,14 +60,43 @@ def RQ6(args: argparse.Namespace):
     sut_root = os.path.join(project_path, "Empirical-Study-LLM-MR", "software-under-test")
     suts = [d for d in os.listdir(sut_root) if os.path.isdir(os.path.join(sut_root, d))]
     suts.sort()
+    lst_temperature = [0.5, 1.0, 1.5]
+    lst_top_p = [0.5, 1.0]
+
+    # Close group
     for sut in suts:
-        for temperature in [0.5, 1.0, 1.5]:
-            for top_p in [0.5, 1.0]:
-                SAYF(f"==================== [SUT: {sut} / temperature: {temperature} / top_p: {top_p}] ====================\n")
+        for temperature in lst_temperature:
+            for top_p in lst_top_p:
+                SAYF(f"==================== [GROUP: close / SUT: {sut} / temperature: {temperature} / top_p: {top_p}] ====================\n")
                 cfg = default_close_config(sut)
                 cfg["agent_iden"]["temperature"] = temperature
                 cfg["agent_iden"]["top_p"] = top_p
                 out_dir = os.path.join(project_path, "workdir", "RQ6", f"close-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
+                max_MRs = 10
+                existing_mrs = list()
+                if os.path.exists(out_dir):
+                    for root, _, files in os.walk(out_dir):
+                        for file in files:
+                            if file.startswith("mr_candidate"):
+                                max_MRs -= 1
+                                existing_mrs.append(os.path.abspath(os.path.join(root, file)))
+                    if max_MRs <= 0:
+                        WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
+                        continue
+                cfg["existing_mrs"] = existing_mrs
+                cfg["max_MRs"] = max_MRs
+                cfg["output"] = out_dir
+                src.gen_candidate.main(cfg)
+
+    # Open group
+    for sut in suts:
+        for temperature in lst_temperature:
+            for top_p in lst_top_p:
+                SAYF(f"==================== [GROUP: open / SUT: {sut} / temperature: {temperature} / top_p: {top_p}] ====================\n")
+                cfg = default_open_config(sut)
+                cfg["agent_iden"]["temperature"] = temperature
+                cfg["agent_iden"]["top_p"] = top_p
+                out_dir = os.path.join(project_path, "workdir", "RQ6", f"open-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
                 max_MRs = 10
                 existing_mrs = list()
                 if os.path.exists(out_dir):

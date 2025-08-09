@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-27 16:42:43
 LastEditors  : Radon
-LastEditTime : 2025-07-24 10:26:07
+LastEditTime : 2025-08-08 22:07:43
 Description  : Utility functions
 """
 
@@ -122,23 +122,23 @@ CFGTMPL_CLOSE_GROUP = {
 
 CFGTMPL_OPEN_GROUP = {
     "agent_iden": {
-        "model": "kimi-k2",
+        "model": "qwen3-235b-a22b-instruct-2507",
         "temperature": 1.0,
         "top_p": 1.0,
         "external_corpus": "DO NOT EDIT HERE",
         "prompts": {"system": "DO NOT EDIT HERE", "user": []},
     },
     "agent_distn": {
-        "model": "deepseek-r1-0528",
+        "model": "glm-4.5-air",
         "temperature": 1.0,
         "top_p": 1.0,
         "prompts": {"system": "DO NOT EDIT HERE", "user": []},
     },
     "agent_cali": [
-        {"model": "deepseek-r1-0528", "temperature": 0.25, "top_p": 0.2, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
-        {"model": "qwen3", "temperature": 0.5, "top_p": 0.4, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
-        {"model": "minimax-m1", "temperature": 0.75, "top_p": 0.6, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
-        {"model": "Llama-4-Maverick-17B-128E-Instruct", "temperature": 1.0, "top_p": 0.8, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+        {"model": "glm-4.5", "temperature": 0.25, "top_p": 0.2, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+        {"model": "kimi-k2-0711-preview", "temperature": 0.5, "top_p": 0.4, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+        {"model": "deepseek-r1-250528", "temperature": 0.75, "top_p": 0.6, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+        {"model": "hunyuan-large", "temperature": 1.0, "top_p": 0.8, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
     ],
     "replacements": {"sut_name": "DO NOT EDIT HERE", "specification": "DO NOT EDIT HERE", "example_mr": "DO NOT EDIT HERE", "example_analysis": "DO NOT EDIT HERE"},
     "existing_mrs": [],
@@ -159,16 +159,16 @@ CFGTMPL_HYBRID_GROUP = {
         "prompts": {"system": "DO NOT EDIT HERE", "user": []},
     },
     "agent_distn": {
-        "model": "qwen3",
+        "model": "kimi-k2-0711-preview",
         "temperature": 1.0,
         "top_p": 1.0,
         "prompts": {"system": "DO NOT EDIT HERE", "user": []},
     },
     "agent_cali": [
         {"model": "o3", "temperature": 0.25, "top_p": 0.2, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
-        {"model": "grok-3", "temperature": 0.5, "top_p": 0.4, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
-        {"model": "kimi-k2", "temperature": 0.75, "top_p": 0.6, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
-        {"model": "deepseek-r1-0528", "temperature": 1.0, "top_p": 0.8, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+        {"model": "qwen3-235b-a22b-instruct-2507", "temperature": 0.5, "top_p": 0.4, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+        {"model": "glm-4.5", "temperature": 0.75, "top_p": 0.6, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+        {"model": "grok-3", "temperature": 1.0, "top_p": 0.8, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
     ],
     "replacements": {"sut_name": "DO NOT EDIT HERE", "specification": "DO NOT EDIT HERE", "example_mr": "DO NOT EDIT HERE", "example_analysis": "DO NOT EDIT HERE"},
     "existing_mrs": [],
@@ -383,4 +383,51 @@ def default_close_config(sut: str) -> dict:
     return cfg
 
 
-# TODO: Add default open group & hybrid group
+def default_open_config(sut: str) -> dict:
+    """Get the default configuration for a open group experiment.
+
+    Parameters
+    ----------
+    sut : str
+        The name of the software under test.
+
+    Returns
+    -------
+    dict
+        The default configuration dictionary.
+    """
+    project_path = str(os.getenv("PROJECT"))
+    cfg = deepcopy(CFGTMPL_OPEN_GROUP)
+    cfg["agent_iden"]["external_corpus"] = os.path.join(project_path, "data", "corpus", sut + ".md")
+    cfg["agent_iden"]["prompts"]["system"] = os.path.join(project_path, "data", "prompts", "iden", "system.md")
+    cfg["agent_iden"]["prompts"]["user"] = [
+        os.path.join(project_path, "data", "prompts", "iden", "user1.md"),
+        os.path.join(project_path, "data", "prompts", "iden", "user2.md"),
+    ]
+    cfg["agent_distn"]["prompts"]["system"] = os.path.join(project_path, "data", "prompts", "distn", "system.md")
+    cfg["agent_distn"]["prompts"]["user"] = [
+        os.path.join(project_path, "data", "prompts", "distn", "user1.md"),
+    ]
+    cfg["agent_distn"]["base_url"] = os.getenv("ZAI_OPENAI_API_BASE")
+    cfg["agent_distn"]["api_key"] = os.getenv("ZAI_API_KEY")
+    for dt in cfg["agent_cali"]:
+        dt["prompts"]["system"] = os.path.join(project_path, "data", "prompts", "cali", "system.md")
+        dt["prompts"]["user"] = [
+            os.path.join(project_path, "data", "prompts", "cali", "user1.md"),
+            os.path.join(project_path, "data", "prompts", "cali", "user2.md"),
+        ]
+        if dt["model"].startswith("glm"):
+            dt["base_url"] = os.getenv("ZAI_OPENAI_API_BASE")
+            dt["api_key"] = os.getenv("ZAI_API_KEY")
+        elif dt["model"].startswith("hunyuan"):
+            dt["base_url"] = os.getenv("HUNYUAN_OPENAI_API_BASE")
+            dt["api_key"] = os.getenv("HUNYUAN_API_KEY")
+    cfg["replacements"]["sut_name"] = SUT_DICT[sut]
+    cfg["replacements"]["specification"] = os.path.join(project_path, "data", "specs", sut + ".md")
+    cfg["replacements"]["example_mr"] = os.path.join(project_path, "data", "example-MRs", sut + ".md")
+    cfg["replacements"]["example_analysis"] = os.path.join(project_path, "data", "example-analysis", sut + ".md")
+    cfg["output"] = os.path.join(project_path, "workdir", "default", sut)
+    cfg["existing_mrs"] = list()
+    return cfg
+
+# TODO: Add default config of hybrid group

@@ -57,6 +57,7 @@ def send_email(subject: str, body: str, receiver: str):
 
 def RQ6(args: argparse.Namespace):
     project_path = str(os.getenv("PROJECT"))
+    cali_linear = args.linear
     sut_root = os.path.join(project_path, "Empirical-Study-LLM-MR", "software-under-test")
     suts = [d for d in os.listdir(sut_root) if os.path.isdir(os.path.join(sut_root, d))]
     suts.sort()
@@ -86,6 +87,7 @@ def RQ6(args: argparse.Namespace):
                 cfg["existing_mrs"] = existing_mrs
                 cfg["max_MRs"] = max_MRs
                 cfg["output"] = out_dir
+                cfg["cali_linear"] = cali_linear
                 src.gen_candidate.main(cfg)
 
     # Open group
@@ -111,6 +113,7 @@ def RQ6(args: argparse.Namespace):
                 cfg["existing_mrs"] = existing_mrs
                 cfg["max_MRs"] = max_MRs
                 cfg["output"] = out_dir
+                cfg["cali_linear"] = cali_linear
                 src.gen_candidate.main(cfg)
 
 
@@ -148,6 +151,7 @@ if __name__ == "__main__":
     subparsers = parser.add_subparsers(title="RQx", required=True)
 
     rq6_parser = subparsers.add_parser("RQ6", help="Run RQ6 experiment")
+    rq6_parser.add_argument("--linear", action="store_true", help="Whether to use linear calibration")
     rq6_parser.set_defaults(func=RQ6)
 
     driver_parser = subparsers.add_parser("driver", help="Prompt llm to generate the driver")

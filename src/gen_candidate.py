@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-08-10 11:35:27
+LastEditTime : 2025-08-10 11:39:42
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -387,10 +387,10 @@ def main(usr_config: dict):
                     candidate = f"```{lang}\n{response}\n```"
                 ACTF("Prompting calibration agent(s) to verify the MR candidate ...")
                 cali_res_lst = list()
-                if usr_config["cali_parallel"]:
-                    cali_res_lst = calibrate_parallel(agent_cali, index, replacements, candidate)
-                else:
+                if usr_config["cali_linear"]:
                     cali_res_lst = calibrate_linear(agent_cali, index, replacements, candidate)
+                else:
+                    cali_res_lst = calibrate_parallel(agent_cali, index, replacements, candidate)
 
                 # Calculate confidence score of calibration
                 score = calculate_score(cali_res_lst, calc_method)
@@ -618,5 +618,5 @@ if __name__ == "__main__":
     load_dotenv()
     cfg_txt = Path(args.config).read_text(encoding="utf-8")
     usr_cfg = json.loads(os.path.expandvars(cfg_txt))
-    usr_cfg["cali_parallel"] = not args.linear
+    usr_cfg["cali_linear"] = args.linear
     main(usr_cfg)

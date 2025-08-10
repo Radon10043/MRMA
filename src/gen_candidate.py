@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-08-08 22:16:31
+LastEditTime : 2025-08-10 11:35:27
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -379,13 +379,18 @@ def main(usr_config: dict):
                 if len(response) == 0:
                     FATAL("Failed to generate response from identification agent!")
                 candidate = get_first_code_block(response)
+
                 # TODO: Sometime llm may not put the codified MR candidate in the code block.
                 # We brute-force assign response to the candidate and surround it with a code
                 # fence. This is a bad idea but I haven't thought of a better solution yet.
                 if len(candidate) == 0:
                     candidate = f"```{lang}\n{response}\n```"
                 ACTF("Prompting calibration agent(s) to verify the MR candidate ...")
-                cali_res_lst = calibrate_parallel(agent_cali, index, replacements, candidate)
+                cali_res_lst = list()
+                if usr_config["cali_parallel"]:
+                    cali_res_lst = calibrate_parallel(agent_cali, index, replacements, candidate)
+                else:
+                    cali_res_lst = calibrate_linear(agent_cali, index, replacements, candidate)
 
                 # Calculate confidence score of calibration
                 score = calculate_score(cali_res_lst, calc_method)
@@ -608,8 +613,10 @@ def calibrate_linear(agents: list[Agent], index: int, replacements: dict, candid
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="MR Identification via LLM, CoT, and RAG")
     parser.add_argument("--config", type=str, required=True, help="Path to the configuration file")
+    parser.add_argument("--linear", action="store_true", help="Whether use linear calibration")
     args = parser.parse_args()
     load_dotenv()
     cfg_txt = Path(args.config).read_text(encoding="utf-8")
     usr_cfg = json.loads(os.path.expandvars(cfg_txt))
+    usr_cfg["cali_parallel"] = not args.linear
     main(usr_cfg)

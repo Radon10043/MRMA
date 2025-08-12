@@ -4,8 +4,8 @@ root_dir=$1
 
 echo "path,test_result"
 for f in $(find $root_dir -name test_driver* | sort); do
-    echo -n "$f,"
     output=""
+    res=""
     exit_code=0
     case $(basename $f) in
         # cpp
@@ -34,12 +34,13 @@ for f in $(find $root_dir -name test_driver* | sort); do
         err=$(($(echo $output | tail -n 1 | awk -F 'Error ' '{print $2}')))
         case $err in
             124)
-                echo "TIMEOUT"
+                res="TIMEOUT"
                 ;;
             *)
-                echo "FAILED"
+                res="FAILED"
         esac
     else
-        echo "PASS"
+        res="PASS"
     fi
+    echo "$f,$res"
 done

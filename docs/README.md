@@ -4,22 +4,25 @@ Welcome to the MR-CoT-RAG project! This document will guide you through setting 
 
 ## Prerequisites 🛠️
 
+### Build the docker
+
 First, clone the repository. Don't forget the submodules!
 
 ```bash
-git clone --recurse-submodules https://github.com/Radon10043/MR-Cot-RAG
+git clone --recurse-submodules https://github.com/Radon10043/MR-CoT-RAG
 ```
 
 If you forgot to include the submodules during the clone, you can initialize them like this:
 
 ```bash
+cd MR-CoT-RAG
 git submodule update --init --recursive
 ```
 
 Next, build the Docker image. You can add the `--network host` flag if needed.
 
 ```bash
-docker build -t mr-cot-rag:latest -f docker/Dockerfile
+docker build -t mr-cot-rag:latest -f docker/Dockerfile .
 ```
 
 Now, run the Docker container:
@@ -33,6 +36,15 @@ Finally, access the container using vscode's remote development features or with
 ```bash
 docker exec -it mr-cot-rag bash
 cd /MR-CoT-RAG  # Run this inside the container
+```
+
+### Set environment variables
+
+We recommend storing environment variables in a `.env` file at the root of the project. The application will automatically load these variables. To get started, you should set the `PROJECT` and `GTEST_DIR` environment variables.
+
+```env
+PROJECT=/vol/MR-CoT-RAG
+GTEST_DIR=/home/tools/googletest-1.14.0
 ```
 
 ## Running the Workflow 🚀
@@ -145,7 +157,19 @@ Here are the available subcommands and their arguments:
 Since experiments can be time-consuming, you can run them in the background and receive an email notification upon completion or if an error occurs. Make sure you have set the `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_SENDER`, and `EMAIL_PASSWORD` environment variables, either in a `.env` file or by exporting them in your terminal.
 
 ```bash
+python3 -u -m src.experiment --email youremail@example.com RQ6
+# Or run in the background
 nohup python3 -u -m src.experiment --email youremail@example.com RQ6 &
+```
+
+### Time presentation
+
+You can use `ts` to show time when logging.
+
+```bash
+python3 -u -m src.experiment --email youremail@example.com RQ6 | ts "[%Y-%m-%d %H:%M:%S]"
+# Or run in the backgournd
+# nohup python3 -u -m src.experiment --email youremail@example.com RQ6 | ts "[%Y-%m-%d %H:%M:%S]" > run.log &
 ```
 
 ## Disclaimer ✨

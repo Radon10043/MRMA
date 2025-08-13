@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-27 16:42:43
 LastEditors  : Radon
-LastEditTime : 2025-08-08 22:07:43
+LastEditTime : 2025-08-13 10:58:47
 Description  : Utility functions
 """
 
@@ -185,7 +185,7 @@ CFGTMPL_HYBRID_GROUP = {
 ###############################
 def SAYF(msg: str, verbose: bool = True):
     if verbose:
-        print(msg, end="")
+        print(get_cur_time() + " " + msg, end="")
 
 
 def WARNF(msg: str, verbose: bool = True):
@@ -283,6 +283,18 @@ def get_first_code_block(md_text: str) -> str:
 
     # Return the code block as a string
     return "\n".join(code_list)
+
+
+def get_cur_time() -> str:
+    """Get current time
+
+    Returns
+    -------
+    str
+        Current time in "yyyy/mm/dd hh:mm:ss" format
+    """
+    cur_time = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime(time.time()))
+    return cur_time
 
 
 def get_cur_time_ms() -> int:

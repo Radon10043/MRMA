@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-27 16:42:43
 LastEditors  : Radon
-LastEditTime : 2025-08-08 22:07:43
+LastEditTime : 2025-08-14 10:00:36
 Description  : Utility functions
 """
 
@@ -137,7 +137,7 @@ CFGTMPL_OPEN_GROUP = {
     "agent_cali": [
         {"model": "glm-4.5", "temperature": 0.25, "top_p": 0.2, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
         {"model": "kimi-k2-0711-preview", "temperature": 0.5, "top_p": 0.4, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
-        {"model": "deepseek-r1-250528", "temperature": 0.75, "top_p": 0.6, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
+        {"model": "deepseek-reasoner", "temperature": 0.75, "top_p": 0.6, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
         {"model": "hunyuan-large", "temperature": 1.0, "top_p": 0.8, "prompts": {"system": "DO NOT EDIT HERE", "user": []}},
     ],
     "replacements": {"sut_name": "DO NOT EDIT HERE", "specification": "DO NOT EDIT HERE", "example_mr": "DO NOT EDIT HERE", "example_analysis": "DO NOT EDIT HERE"},
@@ -404,6 +404,8 @@ def default_open_config(sut: str) -> dict:
         os.path.join(project_path, "data", "prompts", "iden", "user1.md"),
         os.path.join(project_path, "data", "prompts", "iden", "user2.md"),
     ]
+    cfg["agent_iden"]["base_url"] = os.getenv("ALIYUN_OPENAI_API_BASE")
+    cfg["agent_iden"]["api_key"] = os.getenv("ALIYUN_API_KEY")
     cfg["agent_distn"]["prompts"]["system"] = os.path.join(project_path, "data", "prompts", "distn", "system.md")
     cfg["agent_distn"]["prompts"]["user"] = [
         os.path.join(project_path, "data", "prompts", "distn", "user1.md"),
@@ -419,6 +421,12 @@ def default_open_config(sut: str) -> dict:
         if dt["model"].startswith("glm"):
             dt["base_url"] = os.getenv("ZAI_OPENAI_API_BASE")
             dt["api_key"] = os.getenv("ZAI_API_KEY")
+        elif dt["model"].startswith("kimi"):
+            dt["base_url"] = os.getenv("MOONSHOT_OPENAI_API_BASE")
+            dt["api_key"] = os.getenv("MOONSHOT_API_KEY")
+        elif dt["model"].startswith("deepseek"):
+            dt["base_url"] = os.getenv("DEEPSEEK_OPENAI_API_BASE")
+            dt["api_key"] = os.getenv("DEEPSEEK_API_KEY")
         elif dt["model"].startswith("hunyuan"):
             dt["base_url"] = os.getenv("HUNYUAN_OPENAI_API_BASE")
             dt["api_key"] = os.getenv("HUNYUAN_API_KEY")

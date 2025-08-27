@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-27 16:42:43
 LastEditors  : Radon
-LastEditTime : 2025-08-14 10:00:36
+LastEditTime : 2025-08-27 19:32:38
 Description  : Utility functions
 """
 
@@ -438,4 +438,52 @@ def default_open_config(sut: str) -> dict:
     cfg["existing_mrs"] = list()
     return cfg
 
-# TODO: Add default config of hybrid group
+
+def default_hybrid_config(sut: str) -> dict:
+    """Get the default configuration for a hybrid group experiment.
+
+    Parameters
+    ----------
+    sut : str
+        The name of the software under test.
+
+    Returns
+    -------
+    dict
+        The default configuration dictionary.
+    """
+    project_path = str(os.getenv("PROJECT"))
+    cfg = deepcopy(CFGTMPL_HYBRID_GROUP)
+    cfg["agent_iden"]["external_corpus"] = os.path.join(project_path, "data", "corpus", sut + ".md")
+    cfg["agent_iden"]["prompts"]["system"] = os.path.join(project_path, "data", "prompts", "iden", "system.md")
+    cfg["agent_iden"]["prompts"]["user"] = [
+        os.path.join(project_path, "data", "prompts", "iden", "user1.md"),
+        os.path.join(project_path, "data", "prompts", "iden", "user2.md"),
+    ]
+    cfg["agent_iden"]["base_url"] = os.getenv("GOOGLE_OPENAI_API_BASE")
+    cfg["agent_iden"]["api_key"] = os.getenv("GOOGLE_API_KEY")
+    cfg["agent_distn"]["prompts"]["system"] = os.path.join(project_path, "data", "prompts", "distn", "system.md")
+    cfg["agent_distn"]["prompts"]["user"] = [
+        os.path.join(project_path, "data", "prompts", "distn", "user1.md"),
+    ]
+    cfg["agent_distn"]["base_url"] = os.getenv("MOONSHOT_OPENAI_API_BASE")
+    cfg["agent_distn"]["api_key"] = os.getenv("MOONSHOT_API_KEY")
+    for dt in cfg["agent_cali"]:
+        dt["prompts"]["system"] = os.path.join(project_path, "data", "prompts", "cali", "system.md")
+        dt["prompts"]["user"] = [
+            os.path.join(project_path, "data", "prompts", "cali", "user1.md"),
+            os.path.join(project_path, "data", "prompts", "cali", "user2.md"),
+        ]
+        if dt["model"].startswith("glm"):
+            dt["base_url"] = os.getenv("ZAI_OPENAI_API_BASE")
+            dt["api_key"] = os.getenv("ZAI_API_KEY")
+        elif dt["model"].startswith("qwen"):
+            dt["base_url"] = os.getenv("ALIYUN_OPENAI_API_BASE")
+            dt["api_key"] = os.getenv("ALIYUN_API_KEY")
+    cfg["replacements"]["sut_name"] = SUT_DICT[sut]
+    cfg["replacements"]["specification"] = os.path.join(project_path, "data", "specs", sut + ".md")
+    cfg["replacements"]["example_mr"] = os.path.join(project_path, "data", "example-MRs", sut + ".md")
+    cfg["replacements"]["example_analysis"] = os.path.join(project_path, "data", "example-analysis", sut + ".md")
+    cfg["output"] = os.path.join(project_path, "workdir", "default", sut)
+    cfg["existing_mrs"] = list()
+    return cfg

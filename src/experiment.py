@@ -1,12 +1,12 @@
 import argparse
 import json
 import os
+import smtplib
+import sys
+import traceback
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
-import sys
-import traceback
-import smtplib
 
 from dotenv import load_dotenv
 
@@ -55,6 +55,28 @@ def send_email(subject: str, body: str, receiver: str):
         FATAL(f"Failed to send email: {e}")
 
 
+def get_existing_mrs(dir: str) -> list[str]:
+    """Get existing mr candidates under dir.
+
+    Parameters
+    ----------
+    dir : str
+        Directory to search for mr candidates
+
+    Returns
+    -------
+    list[str]
+        List of absolute paths to existing mr candidates
+    """
+    existing_mrs = list()
+    if not Path(dir).exists():
+        return []
+    cands = Path(dir).rglob("mr_candidate*")
+    for file in cands:
+        existing_mrs.append(os.path.abspath(file))
+    return existing_mrs
+
+
 def RQ6(args: argparse.Namespace):
     project_path = str(os.getenv("PROJECT"))
     cali_linear = args.linear
@@ -74,16 +96,11 @@ def RQ6(args: argparse.Namespace):
                 cfg["agent_iden"]["top_p"] = top_p
                 out_dir = os.path.join(project_path, "workdir", "RQ6", f"close-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
                 max_MRs = 10
-                existing_mrs = list()
-                if os.path.exists(out_dir):
-                    for root, _, files in os.walk(out_dir):
-                        for file in files:
-                            if file.startswith("mr_candidate"):
-                                max_MRs -= 1
-                                existing_mrs.append(os.path.abspath(os.path.join(root, file)))
-                    if max_MRs <= 0:
-                        WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
-                        continue
+                existing_mrs = get_existing_mrs(out_dir)
+                max_MRs -= len(existing_mrs)
+                if max_MRs <= 0:
+                    WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
+                    continue
                 cfg["existing_mrs"] = existing_mrs
                 cfg["max_MRs"] = max_MRs
                 cfg["output"] = out_dir
@@ -100,16 +117,32 @@ def RQ6(args: argparse.Namespace):
                 cfg["agent_iden"]["top_p"] = top_p
                 out_dir = os.path.join(project_path, "workdir", "RQ6", f"open-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
                 max_MRs = 10
-                existing_mrs = list()
-                if os.path.exists(out_dir):
-                    for root, _, files in os.walk(out_dir):
-                        for file in files:
-                            if file.startswith("mr_candidate"):
-                                max_MRs -= 1
-                                existing_mrs.append(os.path.abspath(os.path.join(root, file)))
-                    if max_MRs <= 0:
-                        WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
-                        continue
+                existing_mrs = get_existing_mrs(out_dir)
+                max_MRs -= len(existing_mrs)
+                if max_MRs <= 0:
+                    WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
+                    continue
+                cfg["existing_mrs"] = existing_mrs
+                cfg["max_MRs"] = max_MRs
+                cfg["output"] = out_dir
+                cfg["cali_linear"] = cali_linear
+                src.gen_candidate.main(cfg)
+
+    # Hybrid group
+    for sut in suts:
+        for temperature in lst_temperature:
+            for top_p in lst_top_p:
+                SAYF(f"==================== [GROUP: hybrid / SUT: {sut} / temperature: {temperature} / top_p: {top_p}] ====================\n")
+                cfg = default_hybrid_config(sut)
+                cfg["agent_iden"]["temperature"] = temperature
+                cfg["agent_iden"]["top_p"] = top_p
+                out_dir = os.path.join(project_path, "workdir", "RQ6", f"hybrid-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
+                max_MRs = 10
+                existing_mrs = get_existing_mrs(out_dir)
+                max_MRs -= len(existing_mrs)
+                if max_MRs <= 0:
+                    WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
+                    continue
                 cfg["existing_mrs"] = existing_mrs
                 cfg["max_MRs"] = max_MRs
                 cfg["output"] = out_dir

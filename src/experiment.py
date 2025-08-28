@@ -167,7 +167,8 @@ def driver(args: argparse.Namespace):
         cands = get_existing_cands(os.path.join(workdir, sut))
         for cand in cands:
             SAYF(f"========== [MR cand: {cand}] ==========\n")
-            if Path(cand).parent.rglob("test_driver*"):
+            drvs = list(Path(cand).parent.rglob("test_driver*"))
+            if len(drvs) > 0:
                 WARNF(f"Skipping {cand} as test_driver already exists.")
                 continue
             cfg["candidate"] = cand

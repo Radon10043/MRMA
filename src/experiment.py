@@ -55,7 +55,7 @@ def send_email(subject: str, body: str, receiver: str):
         FATAL(f"Failed to send email: {e}")
 
 
-def get_existing_mrs(dir: str) -> list[str]:
+def get_existing_cands(dir: str) -> list[str]:
     """Get existing mr candidates under dir.
 
     Parameters
@@ -96,7 +96,7 @@ def RQ6(args: argparse.Namespace):
                 cfg["agent_iden"]["top_p"] = top_p
                 out_dir = os.path.join(project_path, "workdir", "RQ6", f"close-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
                 max_MRs = 10
-                existing_mrs = get_existing_mrs(out_dir)
+                existing_mrs = get_existing_cands(out_dir)
                 max_MRs -= len(existing_mrs)
                 if max_MRs <= 0:
                     WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
@@ -117,7 +117,7 @@ def RQ6(args: argparse.Namespace):
                 cfg["agent_iden"]["top_p"] = top_p
                 out_dir = os.path.join(project_path, "workdir", "RQ6", f"open-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
                 max_MRs = 10
-                existing_mrs = get_existing_mrs(out_dir)
+                existing_mrs = get_existing_cands(out_dir)
                 max_MRs -= len(existing_mrs)
                 if max_MRs <= 0:
                     WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
@@ -138,7 +138,7 @@ def RQ6(args: argparse.Namespace):
                 cfg["agent_iden"]["top_p"] = top_p
                 out_dir = os.path.join(project_path, "workdir", "RQ6", f"hybrid-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
                 max_MRs = 10
-                existing_mrs = get_existing_mrs(out_dir)
+                existing_mrs = get_existing_cands(out_dir)
                 max_MRs -= len(existing_mrs)
                 if max_MRs <= 0:
                     WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
@@ -164,17 +164,14 @@ def driver(args: argparse.Namespace):
         cfg = json.loads(os.path.expandvars(tmp))
         cfg["agent"]["base_url"] = os.getenv("GOOGLE_OPENAI_API_BASE")
         cfg["agent"]["api_key"] = os.getenv("GOOGLE_API_KEY")
-        for root, _, files in os.walk(os.path.join(workdir, sut)):
-            for file in files:
-                if not file.startswith("mr_candidate"):
-                    continue
-                cand_path = os.path.join(root, file)
-                SAYF(f"========== [MR cand: {cand_path}] ==========\n")
-                if os.path.exists(os.path.join(root, "test_driver")) or os.path.exists(os.path.join(root, "test_driver.py")) or os.path.exists(os.path.join(root, "test_driver.cpp")):
-                    WARNF(f"Skipping {cand_path} as test_driver already exists.")
-                    continue
-                cfg["candidate"] = os.path.abspath(os.path.join(root, file))
-                src.gen_driver.main(cfg)
+        cands = get_existing_cands(os.path.join(workdir, sut))
+        for cand in cands:
+            SAYF(f"========== [MR cand: {cand}] ==========\n")
+            if Path(cand).parent.rglob("test_driver*"):
+                WARNF(f"Skipping {cand} as test_driver already exists.")
+                continue
+            cfg["candidate"] = cand
+            src.gen_driver.main(cfg)
 
 
 if __name__ == "__main__":

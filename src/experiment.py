@@ -1,4 +1,5 @@
 import argparse
+import itertools
 import json
 import os
 import smtplib
@@ -77,77 +78,121 @@ def get_existing_cands(dir: str) -> list[str]:
     return existing_mrs
 
 
+def gen_cand_close(project_path: str, cali_linear: bool, combs: list[tuple]):
+    """Generate candidate MRs via the close group.
+
+    Parameters
+    ----------
+    project_path : str
+        Path to the project.
+    cali_linear : bool
+        Whether to use calibration linearization.
+    combs : list[tuple]
+        List of combinations of SUTs, temperatures, and top_p values.
+    """
+    for sut, temperature, top_p in combs:
+        SAYF(f"==================== [GROUP: close / SUT: {sut} / temperature: {temperature} / top_p: {top_p}] ====================\n")
+        cfg = default_close_config(sut)
+        cfg["agent_iden"]["temperature"] = temperature
+        cfg["agent_iden"]["top_p"] = top_p
+        out_dir = os.path.join(project_path, "workdir", "RQ6", f"close-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
+        max_MRs = 10
+        existing_mrs = get_existing_cands(out_dir)
+        max_MRs -= len(existing_mrs)
+        if max_MRs <= 0:
+            WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
+            continue
+        cfg["existing_mrs"] = existing_mrs
+        cfg["max_MRs"] = max_MRs
+        cfg["output"] = out_dir
+        cfg["cali_linear"] = cali_linear
+        src.gen_candidate.main(cfg)
+
+
+def gen_cand_open(project_path: str, cali_linear: bool, combs: list[tuple]):
+    """Generate candidate MRs via the open group.
+
+    Parameters
+    ----------
+    project_path : str
+        Path to the project.
+    cali_linear : bool
+        Whether to use calibration linearization.
+    combs : list[tuple]
+        List of combinations of SUTs, temperatures, and top_p values.
+    """
+    for sut, temperature, top_p in combs:
+        SAYF(f"==================== [GROUP: open / SUT: {sut} / temperature: {temperature} / top_p: {top_p}] ====================\n")
+        cfg = default_open_config(sut)
+        cfg["agent_iden"]["temperature"] = temperature
+        cfg["agent_iden"]["top_p"] = top_p
+        out_dir = os.path.join(project_path, "workdir", "RQ6", f"open-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
+        max_MRs = 10
+        existing_mrs = get_existing_cands(out_dir)
+        max_MRs -= len(existing_mrs)
+        if max_MRs <= 0:
+            WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
+            continue
+        cfg["existing_mrs"] = existing_mrs
+        cfg["max_MRs"] = max_MRs
+        cfg["output"] = out_dir
+        cfg["cali_linear"] = cali_linear
+        src.gen_candidate.main(cfg)
+
+
+def gen_cand_hybrid(project_path: str, cali_linear: bool, combs: list[tuple]):
+    """Generate candidate MRs via the hybrid group.
+
+    Parameters
+    ----------
+    project_path : str
+        Path to the project.
+    cali_linear : bool
+        Whether to use calibration linearization.
+    combs : list[tuple]
+        List of combinations of SUTs, temperatures, and top_p values.
+    """
+    for sut, temperature, top_p in combs:
+        SAYF(f"==================== [GROUP: hybrid / SUT: {sut} / temperature: {temperature} / top_p: {top_p}] ====================\n")
+        cfg = default_hybrid_config(sut)
+        cfg["agent_iden"]["temperature"] = temperature
+        cfg["agent_iden"]["top_p"] = top_p
+        out_dir = os.path.join(project_path, "workdir", "RQ6", f"hybrid-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
+        max_MRs = 10
+        existing_mrs = get_existing_cands(out_dir)
+        max_MRs -= len(existing_mrs)
+        if max_MRs <= 0:
+            WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
+            continue
+        cfg["existing_mrs"] = existing_mrs
+        cfg["max_MRs"] = max_MRs
+        cfg["output"] = out_dir
+        cfg["cali_linear"] = cali_linear
+        src.gen_candidate.main(cfg)
+
+
 def RQ6(args: argparse.Namespace):
     project_path = str(os.getenv("PROJECT"))
     cali_linear = args.linear
+    group = args.group
     sut_root = os.path.join(project_path, "Empirical-Study-LLM-MR", "software-under-test")
     suts = [d for d in os.listdir(sut_root) if os.path.isdir(os.path.join(sut_root, d))]
     suts.sort()
     lst_temperature = [0.5, 1.0, 1.5]
     lst_top_p = [0.5, 1.0]
+    combs = list(itertools.product(suts, lst_temperature, lst_top_p))
 
     # Close group
-    for sut in suts:
-        for temperature in lst_temperature:
-            for top_p in lst_top_p:
-                SAYF(f"==================== [GROUP: close / SUT: {sut} / temperature: {temperature} / top_p: {top_p}] ====================\n")
-                cfg = default_close_config(sut)
-                cfg["agent_iden"]["temperature"] = temperature
-                cfg["agent_iden"]["top_p"] = top_p
-                out_dir = os.path.join(project_path, "workdir", "RQ6", f"close-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
-                max_MRs = 10
-                existing_mrs = get_existing_cands(out_dir)
-                max_MRs -= len(existing_mrs)
-                if max_MRs <= 0:
-                    WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
-                    continue
-                cfg["existing_mrs"] = existing_mrs
-                cfg["max_MRs"] = max_MRs
-                cfg["output"] = out_dir
-                cfg["cali_linear"] = cali_linear
-                src.gen_candidate.main(cfg)
+    if group == "close" or group == "all":
+        gen_cand_close(project_path, cali_linear, combs)
 
     # Open group
-    for sut in suts:
-        for temperature in lst_temperature:
-            for top_p in lst_top_p:
-                SAYF(f"==================== [GROUP: open / SUT: {sut} / temperature: {temperature} / top_p: {top_p}] ====================\n")
-                cfg = default_open_config(sut)
-                cfg["agent_iden"]["temperature"] = temperature
-                cfg["agent_iden"]["top_p"] = top_p
-                out_dir = os.path.join(project_path, "workdir", "RQ6", f"open-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
-                max_MRs = 10
-                existing_mrs = get_existing_cands(out_dir)
-                max_MRs -= len(existing_mrs)
-                if max_MRs <= 0:
-                    WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
-                    continue
-                cfg["existing_mrs"] = existing_mrs
-                cfg["max_MRs"] = max_MRs
-                cfg["output"] = out_dir
-                cfg["cali_linear"] = cali_linear
-                src.gen_candidate.main(cfg)
+    if group == "open" or group == "all":
+        gen_cand_open(project_path, cali_linear, combs)
 
     # Hybrid group
-    for sut in suts:
-        for temperature in lst_temperature:
-            for top_p in lst_top_p:
-                SAYF(f"==================== [GROUP: hybrid / SUT: {sut} / temperature: {temperature} / top_p: {top_p}] ====================\n")
-                cfg = default_hybrid_config(sut)
-                cfg["agent_iden"]["temperature"] = temperature
-                cfg["agent_iden"]["top_p"] = top_p
-                out_dir = os.path.join(project_path, "workdir", "RQ6", f"hybrid-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
-                max_MRs = 10
-                existing_mrs = get_existing_cands(out_dir)
-                max_MRs -= len(existing_mrs)
-                if max_MRs <= 0:
-                    WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
-                    continue
-                cfg["existing_mrs"] = existing_mrs
-                cfg["max_MRs"] = max_MRs
-                cfg["output"] = out_dir
-                cfg["cali_linear"] = cali_linear
-                src.gen_candidate.main(cfg)
+    if group == "hybrid" or group == "all":
+        gen_cand_hybrid(project_path, cali_linear, combs)
 
 
 def driver(args: argparse.Namespace):
@@ -182,6 +227,7 @@ if __name__ == "__main__":
     subparsers = parser.add_subparsers(title="RQx", required=True)
 
     rq6_parser = subparsers.add_parser("RQ6", help="Run RQ6 experiment")
+    rq6_parser.add_argument("--group", type=str, choices=["close", "open", "hybrid", "all"], help="Which group to use to identify MRs")
     rq6_parser.add_argument("--linear", action="store_true", help="Whether to use linear calibration")
     rq6_parser.set_defaults(func=RQ6)
 

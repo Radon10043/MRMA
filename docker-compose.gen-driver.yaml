@@ -1,0 +1,58 @@
+x-mr-base: &mr-base
+  image: mr-cot-rag:latest
+  working_dir: /vol/MR-CoT-RAG # <- Put your working directory here
+  environment:
+    - http_proxy= # <- Maybe you want to enable proxies
+    - https_proxy=
+  volumes:
+    - xxx:/vol # <- It is recommended to use volumes for persistent storage
+    - /etc/timezone:/etc/timezone:ro
+    - /etc/localtime:/etc/localtime:ro
+
+services:
+  open_temp_0.5_top_0.5:
+    <<: *mr-base
+    cpus: "0.5"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email radon@xs.ustb.edu.cn driver --path workdir/RQ6/open-temp_0.5-top_0.5 > driver_temp_0.5_top_0.5.log 2>&1
+      "
+
+  open_temp_0.5_top_1.0:
+    <<: *mr-base
+    cpus: "0.5"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email radon@xs.ustb.edu.cn driver --path workdir/RQ6/open-temp_0.5-top_1.0 > driver_temp_0.5_top_1.0.log 2>&1
+      "
+  open_temp_1.0_top_0.5:
+    <<: *mr-base
+    cpus: "0.5"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email radon@xs.ustb.edu.cn driver --path workdir/RQ6/open-temp_1.0-top_0.5 > driver_temp_1.0_top_0.5.log 2>&1
+      "
+
+  open_temp_1.0_top_1.0:
+    <<: *mr-base
+    cpus: "0.5"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email radon@xs.ustb.edu.cn driver --path workdir/RQ6/open-temp_1.0-top_1.0 > driver_temp_1.0_top_1.0.log 2>&1
+      "
+
+  open_temp_1.5_top_0.5:
+    <<: *mr-base
+    cpus: "0.5"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email radon@xs.ustb.edu.cn driver --path workdir/RQ6/open-temp_1.5-top_0.5 > driver_temp_1.5_top_0.5.log 2>&1
+      "
+
+  open_temp_1.5_top_1.0:
+    <<: *mr-base
+    cpus: "0.5"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email radon@xs.ustb.edu.cn driver --path workdir/RQ6/open-temp_1.5-top_1.0 > driver_temp_1.5_top_1.0.log 2>&1
+      "

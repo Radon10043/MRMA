@@ -1,0 +1,70 @@
+x-mr-base: &mr-base
+  image: mr-cot-rag:latest
+  working_dir: # <- Put your working directory here
+  environment:
+    - http_proxy= # <- Maybe you want to enable proxies
+    - https_proxy=
+  volumes:
+    - xxx:/vol # <- It is recommended to use volumes for persistent storage
+    - /etc/timezone:/etc/timezone:ro
+    - /etc/localtime:/etc/localtime:ro
+
+services:
+  hybrid_temp_0.5_top_0.5:
+    <<: *mr-base
+    cpus: "0.5"
+    profiles:
+      - "hybrid"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email radon@xs.ustb.edu.cn RQ6 --group hybrid --temperature 0.5 --top_p 0.5 --linear > cand_temp_0.5_top_0.5.log 2>&1
+      "
+
+  hybrid_temp_0.5_top_1.0:
+    <<: *mr-base
+    cpus: "0.5"
+    profiles:
+      - "hybrid"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email radon@xs.ustb.edu.cn RQ6 --group hybrid --temperature 0.5 --top_p 1.0 --linear > cand_temp_0.5_top_1.0.log 2>&1
+      "
+  hybrid_temp_1.0_top_0.5:
+    <<: *mr-base
+    cpus: "0.5"
+    profiles:
+      - "hybrid"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email radon@xs.ustb.edu.cn RQ6 --group hybrid --temperature 1.0 --top_p 0.5 --linear > cand_temp_1.0_top_0.5.log 2>&1
+      "
+
+  hybrid_temp_1.0_top_1.0:
+    <<: *mr-base
+    cpus: "0.5"
+    profiles:
+      - "hybrid"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email radon@xs.ustb.edu.cn RQ6 --group hybrid --temperature 1.0 --top_p 1.0 --linear > cand_temp_1.0_top_1.0.log 2>&1
+      "
+
+  hybrid_temp_1.5_top_0.5:
+    <<: *mr-base
+    cpus: "0.5"
+    profiles:
+      - "hybrid"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email radon@xs.ustb.edu.cn RQ6 --group hybrid --temperature 1.5 --top_p 0.5 --linear > cand_temp_1.5_top_0.5.log 2>&1
+      "
+
+  hybrid_temp_1.5_top_1.0:
+    <<: *mr-base
+    cpus: "0.5"
+    profiles:
+      - "hybrid"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email radon@xs.ustb.edu.cn RQ6 --group hybrid --temperature 1.5 --top_p 1.0 --linear > cand_temp_1.5_top_1.0.log 2>&1
+      "

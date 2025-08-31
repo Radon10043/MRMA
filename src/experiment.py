@@ -78,7 +78,7 @@ def get_existing_cands(dir: str) -> list[str]:
     return existing_mrs
 
 
-def gen_cand_close(project_path: str, cali_linear: bool, combs: list[tuple]):
+def gen_cand_close(project_path: str, cali_linear: bool, suts: list[str], temperature: float, top_p: float):
     """Generate candidate MRs via the close group.
 
     Parameters
@@ -87,10 +87,14 @@ def gen_cand_close(project_path: str, cali_linear: bool, combs: list[tuple]):
         Path to the project.
     cali_linear : bool
         Whether to use calibration linearization.
-    combs : list[tuple]
-        List of combinations of SUTs, temperatures, and top_p values.
+    suts : list[str]
+        List of SUTs to process.
+    temperature : float
+        Temperature to use for MR identification.
+    top_p : float
+        Top-p to use for MR identification.
     """
-    for sut, temperature, top_p in combs:
+    for sut in suts:
         SAYF(f"==================== [GROUP: close / SUT: {sut} / temperature: {temperature} / top_p: {top_p}] ====================\n")
         cfg = default_close_config(sut)
         cfg["agent_iden"]["temperature"] = temperature
@@ -109,7 +113,7 @@ def gen_cand_close(project_path: str, cali_linear: bool, combs: list[tuple]):
         src.gen_candidate.main(cfg)
 
 
-def gen_cand_open(project_path: str, cali_linear: bool, combs: list[tuple]):
+def gen_cand_open(project_path: str, cali_linear: bool, suts: list[str], temperature: float, top_p: float):
     """Generate candidate MRs via the open group.
 
     Parameters
@@ -118,10 +122,14 @@ def gen_cand_open(project_path: str, cali_linear: bool, combs: list[tuple]):
         Path to the project.
     cali_linear : bool
         Whether to use calibration linearization.
-    combs : list[tuple]
-        List of combinations of SUTs, temperatures, and top_p values.
+    suts : list[str]
+        List of SUTs to process.
+    temperature : float
+        Temperature to use for MR identification.
+    top_p : float
+        Top-p to use for MR identification.
     """
-    for sut, temperature, top_p in combs:
+    for sut in suts:
         SAYF(f"==================== [GROUP: open / SUT: {sut} / temperature: {temperature} / top_p: {top_p}] ====================\n")
         cfg = default_open_config(sut)
         cfg["agent_iden"]["temperature"] = temperature
@@ -140,7 +148,7 @@ def gen_cand_open(project_path: str, cali_linear: bool, combs: list[tuple]):
         src.gen_candidate.main(cfg)
 
 
-def gen_cand_hybrid(project_path: str, cali_linear: bool, combs: list[tuple]):
+def gen_cand_hybrid(project_path: str, cali_linear: bool, suts: list[str], temperature: float, top_p: float):
     """Generate candidate MRs via the hybrid group.
 
     Parameters
@@ -149,10 +157,14 @@ def gen_cand_hybrid(project_path: str, cali_linear: bool, combs: list[tuple]):
         Path to the project.
     cali_linear : bool
         Whether to use calibration linearization.
-    combs : list[tuple]
-        List of combinations of SUTs, temperatures, and top_p values.
+    suts : list[str]
+        List of SUTs to process.
+    temperature : float
+        Temperature to use for MR identification.
+    top_p : float
+        Top-p to use for MR identification.
     """
-    for sut, temperature, top_p in combs:
+    for sut in suts:
         SAYF(f"==================== [GROUP: hybrid / SUT: {sut} / temperature: {temperature} / top_p: {top_p}] ====================\n")
         cfg = default_hybrid_config(sut)
         cfg["agent_iden"]["temperature"] = temperature
@@ -175,24 +187,23 @@ def RQ6(args: argparse.Namespace):
     project_path = str(os.getenv("PROJECT"))
     cali_linear = args.linear
     group = args.group
+    temperature = args.temperature
+    top_p = args.top_p
     sut_root = os.path.join(project_path, "Empirical-Study-LLM-MR", "software-under-test")
     suts = [d for d in os.listdir(sut_root) if os.path.isdir(os.path.join(sut_root, d))]
     suts.sort()
-    lst_temperature = [0.5, 1.0, 1.5]
-    lst_top_p = [0.5, 1.0]
-    combs = list(itertools.product(suts, lst_temperature, lst_top_p))
 
     # Close group
     if group == "close" or group == "all":
-        gen_cand_close(project_path, cali_linear, combs)
+        gen_cand_close(project_path, cali_linear, suts, temperature, top_p)
 
     # Open group
     if group == "open" or group == "all":
-        gen_cand_open(project_path, cali_linear, combs)
+        gen_cand_open(project_path, cali_linear, suts, temperature, top_p)
 
     # Hybrid group
     if group == "hybrid" or group == "all":
-        gen_cand_hybrid(project_path, cali_linear, combs)
+        gen_cand_hybrid(project_path, cali_linear, suts, temperature, top_p)
 
 
 def driver(args: argparse.Namespace):
@@ -228,6 +239,8 @@ if __name__ == "__main__":
 
     rq6_parser = subparsers.add_parser("RQ6", help="Run RQ6 experiment")
     rq6_parser.add_argument("--group", type=str, choices=["close", "open", "hybrid", "all"], help="Which group to use to identify MRs")
+    rq6_parser.add_argument("--temperature", type=float, choices=[0.5, 1.0, 1.5], help="Temperature to use for MR identification")
+    rq6_parser.add_argument("--top_p", type=float, choices=[0.5, 1.0], help="Top-p to use for MR identification")
     rq6_parser.add_argument("--linear", action="store_true", help="Whether to use linear calibration")
     rq6_parser.set_defaults(func=RQ6)
 

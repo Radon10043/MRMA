@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-08-10 11:39:42
+LastEditTime : 2025-09-02 09:10:15
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -23,6 +23,7 @@ from langchain_core.tools import tool
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from timeout_decorator import TimeoutError, timeout
 
 from .utils import *
 
@@ -410,7 +411,7 @@ def main(usr_config: dict):
                 if retry <= 0:
                     FATAL(f"Failed to generate a metamorphic relation candidate after {retry} attempts! Error: {repr(e)}")
                 retry -= 1
-                t = random.randint(1, 60)   # Have a break :)
+                t = random.randint(1, 60)  # Have a break :)
                 WARNF("ERROR: " + repr(e))
                 WARNF(f"Have a break for {t} seconds ... ({retry} attempts left)")
                 time.sleep(t)
@@ -550,6 +551,7 @@ def calibrate(agent: Agent, index: int, replacements: dict, candidate: str) -> t
     return agent, result, message
 
 
+@timeout(600, timeout_exception=TimeoutError)
 def calibrate_parallel(agents: list[Agent], index: int, replacements: dict, candidate: str) -> list[tuple[Agent, bool, str]]:
     """Perform calibration of the metamorphic relation candidate using multiple agents (calibrate in parallel).
 
@@ -581,6 +583,7 @@ def calibrate_parallel(agents: list[Agent], index: int, replacements: dict, cand
     return cali_res_lst
 
 
+@timeout(600, timeout_exception=TimeoutError)
 def calibrate_linear(agents: list[Agent], index: int, replacements: dict, candidate: str) -> list[tuple[Agent, bool, str]]:
     """Perform calibration of the metamorphic relation candidate using multiple agents (calibrate one at a time).
 

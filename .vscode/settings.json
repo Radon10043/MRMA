@@ -8,11 +8,17 @@
     "python.analysis.autoImportCompletions": true,
     "isort.importStrategy": "fromEnvironment",
     "files.associations": {
-        "iosfwd": "cpp"
+        "iosfwd": "cpp",
+        ".env*": "dotenv",
+        "vector": "cpp"
     },
     // Light & Dark theme settings
     // "workbench.iconTheme": "catppuccin-latte",
     // "workbench.colorTheme": "Catppuccin Latte",
     "workbench.colorTheme": "One Dark Pro",
-    "workbench.iconTheme": "vscode-icons"
+    "workbench.iconTheme": "vscode-icons",
+    "python.analysis.exclude": [
+        "${workspaceFolder}/workdir/**",
+        "${workspaceFolder}/Empirical-Study-LLM-MR/**"
+    ]
 }

@@ -6,6 +6,14 @@ BIN := $(basename $(SRC)).out
 EXT := $(suffix $(SRC))
 REP ?= 20
 TIMEOUT ?= 5
+VERBOSE?=0
+
+# Conditionally set output redirection based on VERBOSE
+ifeq ($(VERBOSE), 0)
+    REDIRECT = > /dev/null 2>&1
+else
+    REDIRECT =
+endif
 
 # cpp compile configurations
 CXX := g++
@@ -97,7 +105,7 @@ endif
 	@echo "-------------------------------"
 	@for i in $$(seq $(REP)); do \
 		echo -n "Running iteration $$i ..."; \
-		if timeout $(TIMEOUT) $(BIN) > /dev/null 2>&1; then \
+		if timeout $(TIMEOUT) $(BIN) $(REDIRECT); then \
 			echo " OK"; \
 		else \
 			exit_code=$$?; \
@@ -124,7 +132,7 @@ endif
 	@echo "-------------------------------"
 	@for i in $$(seq $(REP)); do \
 		echo -n "Running iteration $$i ..."; \
-		if timeout $(TIMEOUT) $(JAVA) $(JAVAFLAGS) > /dev/null 2>&1; then \
+		if timeout $(TIMEOUT) $(JAVA) $(JAVAFLAGS) $(REDIRECT); then \
 			echo " OK"; \
 		else \
 			exit_code=$$?; \
@@ -151,7 +159,7 @@ endif
 	@echo "-------------------------------"
 	@for i in $$(seq $(REP)); do \
 		echo -n "Running iteration $$i ..."; \
-		if timeout $(TIMEOUT) python3 $(PYTHON) > /dev/null 2>&1; then \
+		if timeout $(TIMEOUT) python3 $(PYTHON) $(REDIRECT); then \
 			echo " OK"; \
 		else \
 			exit_code=$$?; \

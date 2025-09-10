@@ -7,6 +7,8 @@ EXT := $(suffix $(SRC))
 REP ?= 20
 TIMEOUT ?= 5
 VERBOSE?=0
+RED := $(shell tput setaf 1)
+RESET := $(shell tput sgr0)
 
 # Conditionally set output redirection based on VERBOSE
 ifeq ($(VERBOSE), 0)
@@ -44,19 +46,23 @@ TCAS_DIR := $(PROJECT)/Empirical-Study-LLM-MR/software-under-test/TCAS/src
 
 .PHONY: all clean build_cpp build_java build_python build_sir build_printtokens build_printtokens2 build_schedule build_schedule2 build_grep build_tcas run_cpp run_java run_python download patch
 
+# TODO: Deprecate build_cpp, build_java, build_python, run_cpp, run_java, run_python, and related variables.
 build_cpp:
+	$(warning $(RED)This target is deprecated, use scripts/run-driver.sh instead.$(RESET))
 ifndef SRC
 	$(error SRC is not set, please provide a source file to compile (e.g. make SRC=your_file.cpp build_cpp))
 endif
 	$(CXX) $(SRC) $(CXXFLAGS) -o $(BIN) $(INCLUDES) $(LIBS)
 
 build_java:
+	$(warning $(RED)This target is deprecated, use scripts/run-driver.sh instead.$(RESET))
 ifndef JAVAPROJ
 	$(error JAVAPROJ is not set, please provide a source file to compile (e.g. make JAVAPROJ=./test_driver_java build_java))
 endif
 	find $(JAVASRCDIR) -name "*.java" | xargs $(JAVAC) $(JAVACFLAGS) $(JAVATEST) 2> /tmp/build_java.log
 
 build_python:
+	$(warning $(RED)This target is deprecated, use scripts/run-driver.sh instead.$(RESET))
 	@echo "No need to build Python program, just run 'make PYTHON=your_file.py run_python'"
 
 build_printtokens:
@@ -95,6 +101,7 @@ build_sir: build_printtokens build_printtokens2 build_schedule build_schedule2 b
 	@echo "Finished building all SIR programs."
 
 run_cpp:
+	$(warning $(RED)This target is deprecated, use scripts/run-driver.sh instead.$(RESET))
 ifndef BIN
 	$(error BIN is not set, please provide a source file to compile (e.g. make BIN=your_file.out run_cpp))
 endif
@@ -122,6 +129,7 @@ endif
 	@echo "Successfully completed all $(REP) runs."
 
 run_java:
+	$(warning $(RED)This target is deprecated, use scripts/run-driver.sh instead.$(RESET))
 ifndef JAVAPROJ
 	$(error JAVAPROJ is not set, please provide a source file to compile (e.g. make JAVAPROJ=./test_driver_java run_java))
 endif
@@ -149,6 +157,7 @@ endif
 	@echo "Successfully completed all $(REP) runs."
 
 run_python:
+	$(warning $(RED)This target is deprecated, use scripts/run-driver.sh instead.$(RESET))
 ifndef PYTHON
 	$(error PYTHON is not set, please provide a source file to run (e.g. make PYTHON=your_file.py run_python))
 endif

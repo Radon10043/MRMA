@@ -17,11 +17,12 @@ print_help() {
 	echo
 	echo "Usage: $0 [ARGS]"
 	echo "  Args (Required):"
-	echo "    -d|--driver <DRIVER>: The path to the test_driver file."
+	echo "    -d, --driver <DRIVER>: The path to the test_driver file."
 	echo "  Args (Optional):"
-	echo "    -t|--timeout <TIMEOUT>: The timeout for each test driver (default: $TIMEOUT seconds)."
-	echo "    -v|--verbose: Enable verbose mode (default: disable)."
-	echo "    -r|--repeat <REPEAT>: The number of repetitions for each test driver (default: $REPEAT)."
+	echo "    -t, --timeout <TIMEOUT>: The timeout for each test driver (default: $TIMEOUT seconds)."
+	echo "    -v, --verbose: Enable verbose mode (default: disable)."
+	echo "    -r, --repeat <REPEAT>: The number of repetitions for each test driver (default: $REPEAT)."
+	echo "    -h, --help: Show help message."
 	echo
 }
 
@@ -33,13 +34,13 @@ build_cpp() {
 	local INCLUDES="-isystem $GTEST_DIR/googletest/include"
 	local LIBS="$GTEST_DIR/build/lib/libgtest.a $GTEST_DIR/build/lib/libgtest_main.a"
 	local BIN="$(dirname $SRC)/$(basename $SRC .cpp).out"
-	eval $CXX $SRC $CXXFLAGS -o $BIN $INCLUDES $LIBS
+	eval $CXX $SRC $CXXFLAGS -o $BIN $INCLUDES $LIBS $REDIRECT
 }
 
 # Run C++ test driver
 run_cpp() {
 	local BIN=$1
-	eval timeout -f $TIMEOUT $BIN $REDIRECT
+	eval timeout --foreground $TIMEOUT $BIN $REDIRECT
 }
 
 # Build Java test driver
@@ -61,7 +62,7 @@ run_java() {
 }
 
 run_python() {
-	eval timeout $TIMEOUT python3 $DRIVER $REDIRECT
+	eval timeout --foreground $TIMEOUT python3 $DRIVER $REDIRECT
 }
 
 # Analyze arguments
@@ -71,6 +72,10 @@ if [ $# -eq 0 ]; then
 fi
 while [[ $# -gt 0 ]]; do
 	case $1 in
+	-h | --help)
+		print_help
+		exit 0
+		;;
 	-d | --driver)
 		DRIVER=$2
 		shift 2
@@ -159,11 +164,11 @@ for i in $(seq 1 $REPEAT); do
 		case $exit_code in
 		124)
 			echo " TIMEOUT! Stop execution."
-			exit 1
+			exit $exit_code
 			;;
 		*)
 			echo " FAILED! Stop execution."
-			exit 1
+			exit $exit_code
 			;;
 		esac
 	else

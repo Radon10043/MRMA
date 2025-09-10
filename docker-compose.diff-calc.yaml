@@ -1,0 +1,66 @@
+x-mr-base: &mr-base
+  image: mr-cot-rag:latest
+  working_dir: /vol/MR-CoT-RAG # <- Put your working directory here
+  environment:
+    - http_proxy= # <- Maybe you want to enable proxies
+    - https_proxy=
+    - EMAIL="" # <- Set your email here for notification
+  volumes:
+    - vol-mr-cot-rag:/vol # <- It is recommended to use volumes for persistent storage
+    - /etc/timezone:/etc/timezone:ro
+    - /etc/localtime:/etc/localtime:ro
+
+volumes:
+  vol-mr-cot-rag:
+    external: true
+
+services:
+  close_EXP:
+    <<: *mr-base
+    cpus: "0.5"
+    profiles:
+      - "close"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email $$EMAIL iden --group close --temperature 1.0 --top_p 1.0 --calc "EXP" > diff-calc-EXP.log 2>&1
+      "
+
+  close_LIN:
+    <<: *mr-base
+    cpus: "0.5"
+    profiles:
+      - "close"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email $$EMAIL iden --group close --temperature 1.0 --top_p 1.0 --calc "LIN" > diff-calc-LIN.log 2>&1
+      "
+
+  close_LOG:
+    <<: *mr-base
+    cpus: "0.5"
+    profiles:
+      - "close"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email $$EMAIL iden --group close --temperature 1.0 --top_p 1.0 --calc "LOG" > diff-calc-LOG.log 2>&1
+      "
+
+  close_QUA:
+    <<: *mr-base
+    cpus: "0.5"
+    profiles:
+      - "close"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email $$EMAIL iden --group close --temperature 1.0 --top_p 1.0 --calc "QUA" > diff-calc-QUA.log 2>&1
+      "
+
+  close_VAN:
+    <<: *mr-base
+    cpus: "0.5"
+    profiles:
+      - "close"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email $$EMAIL iden --group close --temperature 1.0 --top_p 1.0 --calc "VAN" > diff-calc-VAN.log 2>&1
+      "

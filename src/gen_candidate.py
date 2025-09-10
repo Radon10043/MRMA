@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-09-02 09:10:15
+LastEditTime : 2025-09-10 18:07:42
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -182,7 +182,7 @@ def calculate_score(cali_res_lst: list[tuple[Agent, bool, str]], method: str) ->
     cali_res_lst : list[tuple[Agent, bool, str]]
         List of tuples containing calibration agent, verification result of MR candidate, and message.
     method : str
-        The method for confidence score calculation. Options are "EXP", "LIN", "LOG, and "QUA".
+        The method for confidence score calculation. Options are "EXP", "LIN", "LOG, "QUA", and "VAN".
 
     Returns
     -------
@@ -386,6 +386,14 @@ def main(usr_config: dict):
                 # fence. This is a bad idea but I haven't thought of a better solution yet.
                 if len(candidate) == 0:
                     candidate = f"```{lang}\n{response}\n```"
+
+                # Directly accept the MR candidate if no calibration agent is configured
+                if len(agent_cali) == 0:
+                    WARNF("No calibration agent is configured, directly accept the MR candidate.")
+                    gen_succ = True
+                    break
+
+                # Calibration stage
                 ACTF("Prompting calibration agent(s) to verify the MR candidate ...")
                 cali_res_lst = list()
                 if usr_config["cali_linear"]:
@@ -548,6 +556,7 @@ def calibrate(agent: Agent, index: int, replacements: dict, candidate: str) -> t
         result = False
     else:
         result = True
+    OKF(agent.config["model"] + " calibrate success.")
     return agent, result, message
 
 

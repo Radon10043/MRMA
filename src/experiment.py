@@ -1,5 +1,12 @@
+"""
+Author       : Radon
+Date         : 2025-07-27 14:45:36
+LastEditors  : Radon
+LastEditTime : 2025-09-10 18:31:35
+Description  : Experiment Runner
+"""
+
 import argparse
-import itertools
 import json
 import os
 import smtplib
@@ -78,7 +85,7 @@ def get_existing_cands(dir: str) -> list[str]:
     return existing_mrs
 
 
-def gen_cand_close(project_path: str, cali_linear: bool, suts: list[str], temperature: float, top_p: float):
+def gen_cand_close(project_path: str, cali_linear: bool, suts: list[str], temperature: float, top_p: float, calc: str):
     """Generate candidate MRs via the close group.
 
     Parameters
@@ -93,13 +100,15 @@ def gen_cand_close(project_path: str, cali_linear: bool, suts: list[str], temper
         Temperature to use for MR identification.
     top_p : float
         Top-p to use for MR identification.
+    calc : str
+        Which confidence calculation method is used to calibrate MRs.
     """
     for sut in suts:
         SAYF(f"==================== [GROUP: close / SUT: {sut} / temperature: {temperature} / top_p: {top_p}] ====================\n")
         cfg = default_close_config(sut)
         cfg["agent_iden"]["temperature"] = temperature
         cfg["agent_iden"]["top_p"] = top_p
-        out_dir = os.path.join(project_path, "workdir", "RQ6", f"close-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
+        out_dir = os.path.join(project_path, "workdir", f"close-temp_{temperature:.1f}-top_{top_p:.1f}-{calc}", sut)
         max_MRs = 10
         existing_mrs = get_existing_cands(out_dir)
         max_MRs -= len(existing_mrs)
@@ -107,13 +116,14 @@ def gen_cand_close(project_path: str, cali_linear: bool, suts: list[str], temper
             WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
             continue
         cfg["existing_mrs"] = existing_mrs
+        cfg["score_calc"] = calc
         cfg["max_MRs"] = max_MRs
         cfg["output"] = out_dir
         cfg["cali_linear"] = cali_linear
         src.gen_candidate.main(cfg)
 
 
-def gen_cand_open(project_path: str, cali_linear: bool, suts: list[str], temperature: float, top_p: float):
+def gen_cand_open(project_path: str, cali_linear: bool, suts: list[str], temperature: float, top_p: float, calc: str):
     """Generate candidate MRs via the open group.
 
     Parameters
@@ -128,13 +138,15 @@ def gen_cand_open(project_path: str, cali_linear: bool, suts: list[str], tempera
         Temperature to use for MR identification.
     top_p : float
         Top-p to use for MR identification.
+    calc : str
+        Which confidence calculation method is used to calibrate MRs.
     """
     for sut in suts:
         SAYF(f"==================== [GROUP: open / SUT: {sut} / temperature: {temperature} / top_p: {top_p}] ====================\n")
         cfg = default_open_config(sut)
         cfg["agent_iden"]["temperature"] = temperature
         cfg["agent_iden"]["top_p"] = top_p
-        out_dir = os.path.join(project_path, "workdir", "RQ6", f"open-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
+        out_dir = os.path.join(project_path, "workdir", f"open-temp_{temperature:.1f}-top_{top_p:.1f}-{calc}", sut)
         max_MRs = 10
         existing_mrs = get_existing_cands(out_dir)
         max_MRs -= len(existing_mrs)
@@ -142,13 +154,14 @@ def gen_cand_open(project_path: str, cali_linear: bool, suts: list[str], tempera
             WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
             continue
         cfg["existing_mrs"] = existing_mrs
+        cfg["score_calc"] = calc
         cfg["max_MRs"] = max_MRs
         cfg["output"] = out_dir
         cfg["cali_linear"] = cali_linear
         src.gen_candidate.main(cfg)
 
 
-def gen_cand_hybrid(project_path: str, cali_linear: bool, suts: list[str], temperature: float, top_p: float):
+def gen_cand_hybrid(project_path: str, cali_linear: bool, suts: list[str], temperature: float, top_p: float, calc: str):
     """Generate candidate MRs via the hybrid group.
 
     Parameters
@@ -163,13 +176,15 @@ def gen_cand_hybrid(project_path: str, cali_linear: bool, suts: list[str], tempe
         Temperature to use for MR identification.
     top_p : float
         Top-p to use for MR identification.
+    calc : str
+        Which confidence calculation method is used to calibrate MRs.
     """
     for sut in suts:
         SAYF(f"==================== [GROUP: hybrid / SUT: {sut} / temperature: {temperature} / top_p: {top_p}] ====================\n")
         cfg = default_hybrid_config(sut)
         cfg["agent_iden"]["temperature"] = temperature
         cfg["agent_iden"]["top_p"] = top_p
-        out_dir = os.path.join(project_path, "workdir", "RQ6", f"hybrid-temp_{temperature:.1f}-top_{top_p:.1f}", sut)
+        out_dir = os.path.join(project_path, "workdir", f"hybrid-temp_{temperature:.1f}-top_{top_p:.1f}-{calc}", sut)
         max_MRs = 10
         existing_mrs = get_existing_cands(out_dir)
         max_MRs -= len(existing_mrs)
@@ -177,36 +192,52 @@ def gen_cand_hybrid(project_path: str, cali_linear: bool, suts: list[str], tempe
             WARNF(f"Skipping {sut} with temperature {temperature} and top_p {top_p} as it already has enough candidates.")
             continue
         cfg["existing_mrs"] = existing_mrs
+        cfg["score_calc"] = calc
         cfg["max_MRs"] = max_MRs
         cfg["output"] = out_dir
         cfg["cali_linear"] = cali_linear
         src.gen_candidate.main(cfg)
 
 
-def RQ6(args: argparse.Namespace):
+def iden(args: argparse.Namespace):
+    """Perform MR identification.
+
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Command line arguments.
+    """
     project_path = str(os.getenv("PROJECT"))
-    cali_linear = args.linear
     group = args.group
+    cali_linear = args.linear
     temperature = args.temperature
     top_p = args.top_p
+    calc = args.calc
     sut_root = os.path.join(project_path, "Empirical-Study-LLM-MR", "software-under-test")
     suts = [d for d in os.listdir(sut_root) if os.path.isdir(os.path.join(sut_root, d))]
     suts.sort()
 
     # Close group
     if group == "close" or group == "all":
-        gen_cand_close(project_path, cali_linear, suts, temperature, top_p)
+        gen_cand_close(project_path, cali_linear, suts, temperature, top_p, calc)
 
     # Open group
     if group == "open" or group == "all":
-        gen_cand_open(project_path, cali_linear, suts, temperature, top_p)
+        gen_cand_open(project_path, cali_linear, suts, temperature, top_p, calc)
 
     # Hybrid group
     if group == "hybrid" or group == "all":
-        gen_cand_hybrid(project_path, cali_linear, suts, temperature, top_p)
+        gen_cand_hybrid(project_path, cali_linear, suts, temperature, top_p, calc)
 
 
 def driver(args: argparse.Namespace):
+    """Generate test drivers for the identified MRs.
+
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Command line arguments.
+    """
     project_path = str(os.getenv("PROJECT"))
     workdir = args.path
     cfg_tmpl_root = os.path.join(project_path, "configs")
@@ -237,12 +268,13 @@ if __name__ == "__main__":
     parser.add_argument("--email", type=str, default="", help="Email address to send notifications to")
     subparsers = parser.add_subparsers(title="RQx", required=True)
 
-    rq6_parser = subparsers.add_parser("RQ6", help="Run RQ6 experiment")
-    rq6_parser.add_argument("--group", type=str, choices=["close", "open", "hybrid", "all"], help="Which group to use to identify MRs")
-    rq6_parser.add_argument("--temperature", type=float, choices=[0.5, 1.0, 1.5], help="Temperature to use for MR identification")
-    rq6_parser.add_argument("--top_p", type=float, choices=[0.5, 1.0], help="Top-p to use for MR identification")
+    rq6_parser = subparsers.add_parser("iden", help="Run identification experiment")
+    rq6_parser.add_argument("--group", type=str, choices=["close", "open", "hybrid", "all"], required=True, help="Which group to use to identify MRs")
+    rq6_parser.add_argument("--temperature", type=float, choices=[0.5, 1.0, 1.5], required=True, help="Temperature to use for MR identification")
+    rq6_parser.add_argument("--top_p", type=float, choices=[0.5, 1.0], required=True, help="Top-p to use for MR identification")
+    rq6_parser.add_argument("--calc", type=str, choices=["EXP", "LIN", "LOG", "QUA", "VAN"], default="EXP", help="Which confidence calculation method is used to calibrate MRs")
     rq6_parser.add_argument("--linear", action="store_true", help="Whether to use linear calibration")
-    rq6_parser.set_defaults(func=RQ6)
+    rq6_parser.set_defaults(func=iden)
 
     driver_parser = subparsers.add_parser("driver", help="Prompt llm to generate the driver")
     driver_parser.add_argument("--path", type=str, required=True, help="Path including software under test and corresponding mr candidates")

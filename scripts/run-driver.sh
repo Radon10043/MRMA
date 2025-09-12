@@ -9,20 +9,18 @@ DRIVER=           # Path to test driver
 TIMEOUT=5         # Timeout in seconds for each test driver
 VERBOSE=0         # Verbose mode
 REPEAT=20         # Number of repetitions for each test driver
-REDIRECT=         # Redirect output
-DEVNULL=/dev/null # Black hole (8?)
 
 # Print help message
 print_help() {
 	echo
 	echo "Usage: $0 [ARGS]"
 	echo "  Args (Required):"
-	echo "    -d, --driver <DRIVER>: The path to the test_driver file."
+	echo "    -d, --driver <DRIVER>    The path to the test_driver file."
 	echo "  Args (Optional):"
-	echo "    -t, --timeout <TIMEOUT>: The timeout for each test driver (default: $TIMEOUT seconds)."
-	echo "    -v, --verbose: Enable verbose mode (default: disable)."
-	echo "    -r, --repeat <REPEAT>: The number of repetitions for each test driver (default: $REPEAT)."
-	echo "    -h, --help: Show help message."
+	echo "    -t, --timeout <TIMEOUT>  The timeout for each test driver (default: $TIMEOUT seconds)."
+	echo "    -v, --verbose            Enable verbose mode (default: disable)."
+	echo "    -r, --repeat <REPEAT>    The number of repetitions for each test driver (default: $REPEAT)."
+	echo "    -h, --help               Show help message."
 	echo
 }
 
@@ -34,13 +32,13 @@ build_cpp() {
 	local INCLUDES="-isystem $GTEST_DIR/googletest/include"
 	local LIBS="$GTEST_DIR/build/lib/libgtest.a $GTEST_DIR/build/lib/libgtest_main.a"
 	local BIN="$(dirname $SRC)/$(basename $SRC .cpp).out"
-	eval $CXX $SRC $CXXFLAGS -o $BIN $INCLUDES $LIBS $REDIRECT
+	eval $CXX $SRC $CXXFLAGS -o $BIN $INCLUDES $LIBS
 }
 
 # Run C++ test driver
 run_cpp() {
 	local BIN=$1
-	eval timeout --foreground $TIMEOUT $BIN $REDIRECT
+	eval timeout --foreground $TIMEOUT $BIN
 }
 
 # Build Java test driver
@@ -50,7 +48,7 @@ build_java() {
 	local JAVACFLAGS="-d $JAVAPROJ/bin -cp \"$JAVAPROJ/lib/*\""
 	local JAVATEST="$JAVAPROJ/test/DriverTest.java"
 	local JAVASRCDIR="$JAVAPROJ/src"
-	eval $JAVAC $JAVACFLAGS $JAVATEST $(find $JAVASRCDIR -name "*.java") $REDIRECT
+	eval $JAVAC $JAVACFLAGS $JAVATEST $(find $JAVASRCDIR -name "*.java")
 }
 
 # Run Java test driver
@@ -58,11 +56,11 @@ run_java() {
 	local JAVAPROJ=$1
 	local JAVA=java
 	local JAVAFLAGS="-cp \"$JAVAPROJ/bin:$JAVAPROJ/lib/*\" org.junit.platform.console.ConsoleLauncher -disable-ansi-colors --scan-class-path"
-	eval timeout --foreground $TIMEOUT $JAVA $JAVAFLAGS $REDIRECT
+	eval timeout --foreground $TIMEOUT $JAVA $JAVAFLAGS
 }
 
 run_python() {
-	eval timeout --foreground $TIMEOUT python3 $DRIVER $REDIRECT
+	eval timeout --foreground $TIMEOUT python3 $DRIVER
 }
 
 # Analyze arguments
@@ -120,6 +118,10 @@ test_driver)
 	exit_code=$?
 	JAVAPROJ=$DRIVER
 	;;
+# python
+test_driver.py)
+	# Nothing to do :)
+	;;
 *)
 	echo "Unsupported test driver: $DRIVER"
 	exit 1
@@ -148,7 +150,7 @@ for i in $(seq 1 $REPEAT); do
 		;;
 	# java
 	test_driver)
-		run_java $JAVAPROJ
+		output=$(run_java $JAVAPROJ 2>&1)
 		;;
 	# python
 	test_driver.py)
@@ -164,14 +166,23 @@ for i in $(seq 1 $REPEAT); do
 		case $exit_code in
 		124)
 			echo " TIMEOUT! Stop execution."
-			exit $exit_code
 			;;
 		*)
 			echo " FAILED! Stop execution."
-			exit $exit_code
 			;;
 		esac
 	else
 		echo " OK"
+	fi
+	if [ $VERBOSE -eq 1 ]; then
+		echo
+		echo "######"
+		echo "Output:"
+		echo "######"
+		echo
+		echo "$output"
+	fi
+	if [ $exit_code -ne 0 ]; then
+		exit $exit_code
 	fi
 done

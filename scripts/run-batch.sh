@@ -9,9 +9,9 @@ print_help() {
     echo
     echo "Usage: $0 [ARGS]"
     echo "  Args (Required):"
-    echo "    -p, --path <ROOTDIR>: The root directory to search for test_driver files."
+    echo "    -p, --path <ROOTDIR>  The root directory to search for test_driver files."
     echo "  Args (Optional):"
-    echo "    -h, --help: Show help message."
+    echo "    -h, --help:           Show help message."
     echo
 }
 

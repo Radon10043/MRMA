@@ -96,25 +96,20 @@ while [[ $# -gt 0 ]]; do
 		;;
 	esac
 done
-# Conditionally set output redirection based on VERBOSE
-if [ $VERBOSE -eq 0 ]; then
-	REDIRECT="> $DEVNULL 2>&1"
-else
-	REDIRECT=
-fi
 
 # Build
 exit_code=0
+output=""
 case $(basename $DRIVER) in
 # cpp
 test_driver.cpp)
-	build_cpp $DRIVER
+	output=$(build_cpp $DRIVER 2>&1)
 	exit_code=$?
 	BIN=$(dirname $DRIVER)/test_driver.out
 	;;
 # java
 test_driver)
-	build_java $DRIVER
+	output=$(build_java $DRIVER 2>&1)
 	exit_code=$?
 	JAVAPROJ=$DRIVER
 	;;
@@ -127,6 +122,14 @@ test_driver.py)
 	exit 1
 	;;
 esac
+if [ $VERBOSE -eq 1 ]; then
+	echo
+	echo "######"
+	echo "Build output:"
+	echo "######"
+	echo
+	echo "$output"
+fi
 if [ $exit_code -ne 0 ]; then
 	echo "Build failed for $DRIVER"
 	exit 1

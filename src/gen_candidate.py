@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-09-10 18:07:42
+LastEditTime : 2025-09-14 10:31:35
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -494,6 +494,7 @@ def write_stats(stats_path: str, info_dict: dict):
             f.write(f"{k.ljust(mx_len)}: {v}\n")
 
 
+@timeout(600, timeout_exception=TimeoutError)
 def identify(agent_iden: Agent, index: int, replacements: dict) -> str:
     """Identify a metamorphic relation candidate using the identification agent.
 

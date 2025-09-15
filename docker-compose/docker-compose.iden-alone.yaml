@@ -1,0 +1,112 @@
+x-mr-base: &mr-base
+  image: mr-cot-rag:latest
+  working_dir: /vol/MR-CoT-RAG # <- Put your working directory here
+  environment:
+    - http_proxy= # <- Maybe you want to enable proxies
+    - https_proxy=
+    - EMAIL="" # <- Set your email here for notification
+  volumes:
+    - vol-mr-cot-rag:/vol # <- It is recommended to use volumes for persistent storage
+    - /etc/timezone:/etc/timezone:ro
+    - /etc/localtime:/etc/localtime:ro
+
+volumes:
+  vol-mr-cot-rag:
+    external: true
+
+services:
+  gemini-2.5-pro:
+    <<: *mr-base
+    cpus: "0.5"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email $$EMAIL iden_alone --model gemini-2.5-pro > single_gemini-2.5-pro.log 2>&1
+      "
+
+  gemini-2.5-flash:
+    <<: *mr-base
+    cpus: "0.5"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email $$EMAIL iden_alone --model gemini-2.5-flash > single_gemini-2.5-flash.log 2>&1
+      "
+
+  o3-2025-04-16:
+    <<: *mr-base
+    cpus: "0.5"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email $$EMAIL iden_alone --model o3-2025-04-16 > single_o3-2025-04-16.log 2>&1
+      "
+
+  chatgpt-4o-latest:
+    <<: *mr-base
+    cpus: "0.5"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email $$EMAIL iden_alone --model chatgpt-4o-latest > single_chatgpt-4o-latest.log 2>&1
+      "
+
+  grok-3:
+    <<: *mr-base
+    cpus: "0.5"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email $$EMAIL iden_alone --model grok-3 > single_grok-3.log 2>&1
+      "
+
+  claude-sonnet-4-20250514-thinking:
+    <<: *mr-base
+    cpus: "0.5"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email $$EMAIL iden_alone --model claude-sonnet-4-20250514-thinking > single_claude-sonnet-4-20250514-thinking.log 2>&1
+      "
+
+  qwen3-235b-a22b-instruct-2507:
+    <<: *mr-base
+    cpus: "0.5"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email $$EMAIL iden_alone --model qwen3-235b-a22b-instruct-2507 > single_qwen3-235b-a22b-instruct-2507.log 2>&1
+      "
+
+  glm-4.5-air:
+    <<: *mr-base
+    cpus: "0.5"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email $$EMAIL iden_alone --model glm-4.5-air > single_glm-4.5-air.log 2>&1
+      "
+
+  glm-4.5:
+    <<: *mr-base
+    cpus: "0.5"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email $$EMAIL iden_alone --model glm-4.5 > single_glm-4.5.log 2>&1
+      "
+
+  kimi-k2-0711-preview:
+    <<: *mr-base
+    cpus: "0.5"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email $$EMAIL iden_alone --model kimi-k2-0711-preview > single_kimi-k2-0711-preview.log 2>&1
+      "
+
+  deepseek-reasoner:
+    <<: *mr-base
+    cpus: "0.5"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email $$EMAIL iden_alone --model deepseek-reasoner > single_deepseek-reasoner.log 2>&1
+      "
+
+  hunyuan-large:
+    <<: *mr-base
+    cpus: "0.5"
+    command: >
+      bash -c "
+        python3 -u -m src.experiment --email $$EMAIL iden_alone --model hunyuan-large > single_hunyuan-large.log 2>&1
+      "

@@ -40,6 +40,9 @@ done
 # Run test drivers in batches
 echo "path,test_result"
 for f in $(find $ROOTDIR -name test_driver* | sort); do
+    if [ $(basename $f) == "test_driver.out" ]; then
+        continue
+    fi
     res=""
     $RUN_DRIVER_SH --driver $f >$DEVNULL
     exit_code=$?

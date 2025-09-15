@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-09-14 10:31:35
+LastEditTime : 2025-09-15 22:02:06
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -320,15 +320,17 @@ def main(usr_config: dict):
     # Initialize vector store
     init_vector_store(config_iden.get("external_corpus"))
 
-    # Initialize calibration and distilliation agents.Identification agent is
+    # Initialize calibration and distilliation agents. Identification agent is
     # initilized later since we need update its system prompt to prevent
     # duplicate MR candidate generation
     ACTF("Initializing agents ...")
-    agent_distn = Agent(config_distn, [], replacements)
     agent_cali = list()
+    agent_distn = None
     for cfg in config_cali:
         agent = Agent(cfg, [], replacements)
         agent_cali.append(agent)
+    if len(agent_cali): # If no calibration agent is configured, distillation agent is unnecessary
+        agent_distn = Agent(config_distn, [], replacements)
 
     # candidates store the existing metamorphic relation candidates or existing metamorphic relations
     candidates = list()
@@ -363,9 +365,10 @@ def main(usr_config: dict):
 
         # Generate unique thread IDs for chating iteratively
         agent_iden.runnable_config = RunnableConfig({"configurable": {"thread_id": uuid.uuid4().hex}})
-        agent_distn.runnable_config = RunnableConfig({"configurable": {"thread_id": uuid.uuid4().hex}})
         for i in range(len(agent_cali)):
             agent_cali[i].runnable_config = RunnableConfig({"configurable": {"thread_id": uuid.uuid4().hex}})
+        if agent_distn is not None:
+            agent_distn.runnable_config = RunnableConfig({"configurable": {"thread_id": uuid.uuid4().hex}})
 
         # Start a new chat to identify one metamorphic relation candidate
         retry = 3
@@ -408,7 +411,7 @@ def main(usr_config: dict):
                 # else, update existing MR candidates and open a new chat to generate a new MR candidate
                 if score < score_threshold:
                     WARNF(f"Confidence score is lower than threshold ({score} < {score_threshold}), distilling error messages ...")
-                    distn_err_msg = distill(agent_distn, index, cali_res_lst)
+                    distn_err_msg = distill(agent_distn, index, cali_res_lst) # type: ignore
                     replacements["distn_error_messages"] = distn_err_msg
                 else:
                     OKF(f"Confidence score is satisfied ({score} >= {score_threshold}), adding to candidate list ...")
@@ -450,10 +453,11 @@ def main(usr_config: dict):
             "agent iden": agent_iden.config["model"],
             "agent iden temperature": agent_iden.config["temperature"],
             "agent iden top_p": agent_iden.config["top_p"],
-            "agent distn": agent_distn.config["model"],
-            "agent distn temperature": agent_distn.config["temperature"],
-            "agent distn top_p": agent_distn.config["top_p"],
         }
+        if not agent_distn is None:
+            log_dict["agent distn"] = agent_distn.config["model"]
+            log_dict["agent distn temperature"] = agent_distn.config["temperature"]
+            log_dict["agent distn top_p"] = agent_distn.config["top_p"]
         for i in range(len(agent_cali)):
             log_dict[f"agent cali {i + 1}"] = agent_cali[i].config["model"]
             log_dict[f"agent cali {i + 1} temperature"] = agent_cali[i].config["temperature"]
@@ -467,9 +471,10 @@ def main(usr_config: dict):
 
         # Log chat history of identification, calibration, and distillation agents to the local
         save_agent_messages(agent_iden, os.path.join(out_dir, "agent_iden_messages.txt"))
-        save_agent_messages(agent_distn, os.path.join(out_dir, "agent_distn_messages.txt"))
         for i in range(len(agent_cali)):
             save_agent_messages(agent_cali[i], os.path.join(out_dir, f"agent_cali_{i}_messages.txt"))
+        if agent_distn is not None:
+            save_agent_messages(agent_distn, os.path.join(out_dir, "agent_distn_messages.txt"))
 
         cnt += 1
 

@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-07-27 14:45:36
 LastEditors  : Radon
-LastEditTime : 2025-09-10 18:31:35
+LastEditTime : 2025-09-15 21:40:40
 Description  : Experiment Runner
 """
 
@@ -230,6 +230,36 @@ def iden(args: argparse.Namespace):
         gen_cand_hybrid(project_path, cali_linear, suts, temperature, top_p, calc)
 
 
+def iden_alone(args: argparse.Namespace):
+    """Perform MR identification via a single LLM.
+
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Command line arguments.
+    """
+    project_path = str(os.getenv("PROJECT"))
+    model = args.model
+    sut_root = os.path.join(project_path, "Empirical-Study-LLM-MR", "software-under-test")
+    suts = [d for d in os.listdir(sut_root) if os.path.isdir(os.path.join(sut_root, d))]
+    suts.sort()
+
+    for sut in suts:
+        SAYF(f"==================== [SUT: {sut} / model: {model}] ====================\n")
+        cfg = default_single_config(sut, model)
+        out_dir = os.path.join(project_path, "workdir", f"single_{model}-temp_1.0-top_1.0-EXP", sut)
+        max_MRs = 10
+        existing_mrs = get_existing_cands(out_dir)
+        max_MRs -= len(existing_mrs)
+        if max_MRs <= 0:
+            WARNF(f"Skipping {sut} with model {model} as it already has enough candidates.")
+            continue
+        cfg["existing_mrs"] = existing_mrs
+        cfg["max_MRs"] = max_MRs
+        cfg["output"] = out_dir
+        src.gen_candidate.main(cfg)
+
+
 def driver(args: argparse.Namespace):
     """Generate test drivers for the identified MRs.
 
@@ -268,13 +298,17 @@ if __name__ == "__main__":
     parser.add_argument("--email", type=str, default="", help="Email address to send notifications to")
     subparsers = parser.add_subparsers(title="RQx", required=True)
 
-    rq6_parser = subparsers.add_parser("iden", help="Run identification experiment")
-    rq6_parser.add_argument("--group", type=str, choices=["close", "open", "hybrid", "all"], required=True, help="Which group to use to identify MRs")
-    rq6_parser.add_argument("--temperature", type=float, choices=[0.5, 1.0, 1.5], required=True, help="Temperature to use for MR identification")
-    rq6_parser.add_argument("--top_p", type=float, choices=[0.5, 1.0], required=True, help="Top-p to use for MR identification")
-    rq6_parser.add_argument("--calc", type=str, choices=["EXP", "LIN", "LOG", "QUA", "VAN"], default="EXP", help="Which confidence calculation method is used to calibrate MRs")
-    rq6_parser.add_argument("--linear", action="store_true", help="Whether to use linear calibration")
-    rq6_parser.set_defaults(func=iden)
+    iden_parser = subparsers.add_parser("iden", help="Run identification experiment")
+    iden_parser.add_argument("--group", type=str, choices=["close", "open", "hybrid", "all"], required=True, help="Which group to use to identify MRs")
+    iden_parser.add_argument("--temperature", type=float, choices=[0.5, 1.0, 1.5], required=True, help="Temperature to use for MR identification")
+    iden_parser.add_argument("--top_p", type=float, choices=[0.5, 1.0], required=True, help="Top-p to use for MR identification")
+    iden_parser.add_argument("--calc", type=str, choices=["EXP", "LIN", "LOG", "QUA", "VAN"], default="EXP", help="Which confidence calculation method is used to calibrate MRs")
+    iden_parser.add_argument("--linear", action="store_true", help="Whether to use linear calibration")
+    iden_parser.set_defaults(func=iden)
+
+    iden_alone_parser = subparsers.add_parser("iden_alone", help="Run identification experiment via single LLM")
+    iden_alone_parser.add_argument("--model", type=str, required=True, choices=SUPPORTED_MODELS, help="Model to use for MR identification")
+    iden_alone_parser.set_defaults(func=iden_alone)
 
     driver_parser = subparsers.add_parser("driver", help="Prompt llm to generate the driver")
     driver_parser.add_argument("--path", type=str, required=True, help="Path including software under test and corresponding mr candidates")

@@ -10,7 +10,8 @@
     "files.associations": {
         "iosfwd": "cpp",
         ".env*": "dotenv",
-        "vector": "cpp"
+        "vector": "cpp",
+        "string": "cpp"
     },
     // Light & Dark theme settings
     // "workbench.iconTheme": "catppuccin-latte",

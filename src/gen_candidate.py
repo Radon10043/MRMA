@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-24 17:28:25
 LastEditors  : Radon
-LastEditTime : 2025-09-15 22:02:06
+LastEditTime : 2025-09-16 19:57:39
 Description  : MR Identification via LLM, CoT, and RAG
 """
 
@@ -360,8 +360,17 @@ def main(usr_config: dict):
             prompt_prevent_dup = "\n\n".join(candidates)
             prompt_prevent_dup = f"Please do not generate a metamorphic relation that is repeated with the following:\n{prompt_prevent_dup}\n\n"
         replacements["prompt_prevent_dup"] = prompt_prevent_dup
-        # TODO: Add tools for reading code?
-        agent_iden = Agent(config_iden, [retrieve], replacements)
+
+        # TODO: Currently, tool is hard-coded into the program. This is ad-hoc and we need to complete
+        # following tasks in the future:
+        #   - Leave the choice of tools to the user, e.g. read the "tools" field in the config.
+        #   - Refactor the code to put the tools in one file or folder
+        #   - Add tools for reading code?
+        tools = [retrieve]
+        if config_iden["model"] in TOOLS_UNSUPPORTED_MODELS:
+            WARNF(f"Model {config_iden['model']} does not support tools, 'retrieve' tool will be ignored.")
+            tools = []
+        agent_iden = Agent(config_iden, tools, replacements)
 
         # Generate unique thread IDs for chating iteratively
         agent_iden.runnable_config = RunnableConfig({"configurable": {"thread_id": uuid.uuid4().hex}})

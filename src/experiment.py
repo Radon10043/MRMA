@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-07-27 14:45:36
 LastEditors  : Radon
-LastEditTime : 2025-09-15 21:40:40
+LastEditTime : 2025-09-16 17:13:37
 Description  : Experiment Runner
 """
 
@@ -247,7 +247,7 @@ def iden_alone(args: argparse.Namespace):
     for sut in suts:
         SAYF(f"==================== [SUT: {sut} / model: {model}] ====================\n")
         cfg = default_single_config(sut, model)
-        out_dir = os.path.join(project_path, "workdir", f"single_{model}-temp_1.0-top_1.0-EXP", sut)
+        out_dir = os.path.join(project_path, "workdir", f"single_{model}-temp_1.0-top_1.0", sut)
         max_MRs = 10
         existing_mrs = get_existing_cands(out_dir)
         max_MRs -= len(existing_mrs)

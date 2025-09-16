@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-06-27 16:42:43
 LastEditors  : Radon
-LastEditTime : 2025-09-15 22:00:36
+LastEditTime : 2025-09-16 19:46:13
 Description  : Utility functions
 """
 
@@ -215,6 +215,13 @@ SUPPORTED_MODELS = [
     "deepseek-reasoner",
     "hunyuan-large",
 ]
+
+########################################
+### Models that do not support tools ###
+########################################
+TOOLS_UNSUPPORTED_MODELS = {
+    "chatgpt-4o-latest",
+}
 
 #######################################################################
 ### Model prefix and corresponding base_url and api_key envvar name ###

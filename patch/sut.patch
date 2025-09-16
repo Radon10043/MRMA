@@ -11,3 +11,28 @@ index 7c5c621..c39bf0d 100644
      return p(vec.data(), x, vec.size());
  }
  
+diff --git a/software-under-test/grep/src/build.sh b/software-under-test/grep/src/build.sh
+index 041d72a..c973a56 100755
+--- a/software-under-test/grep/src/build.sh
++++ b/software-under-test/grep/src/build.sh
+@@ -1,12 +1,13 @@
++#!/bin/bash
++
+ # Download
+-wget https://ftp.gnu.org/gnu/grep/grep-3.11.tar.gz
++wget -nc https://ftp.gnu.org/gnu/grep/grep-3.11.tar.gz
+ 
+ # Decompress
+ tar -xzvf grep-3.11.tar.gz
+-rm -r grep-3.11.tar.gz
+ 
+ # Compile and build
+ cd grep-3.11
+-mkdir obj-temp && cd obj-temp
+-../configure --disable-shared --prefix=$PWD
+-make
+\ No newline at end of file
++mkdir -p obj-temp && cd obj-temp
++../configure --prefix=$PWD
++make clean && make
+\ No newline at end of file

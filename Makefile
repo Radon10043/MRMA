@@ -98,7 +98,10 @@ build_tcas:
 	@echo "OK"
 
 build_sir: build_printtokens build_printtokens2 build_schedule build_schedule2 build_grep build_tcas
-	@echo "Finished building all SIR programs."
+	@mkdir -p bin
+	@cp $(PT_DIR)/print_tokens.out $(PT2_DIR)/print_tokens2.out $(SCD_DIR)/schedule.out \
+		$(SCD2_DIR)/schedule2.out $(GREP_DIR)/grep-3.11/obj-temp/src/grep $(TCAS_DIR)/tcas.out bin/
+	@echo "Done, checking binaries in their corresponding source directory or in bin/."
 
 run_cpp:
 	$(warning $(RED)This target is deprecated, use scripts/run-driver.sh instead.$(RESET))
@@ -198,6 +201,13 @@ check:
 	@python3 -m src.check --out check.log
 	@echo "Check completed, see details in check.log"
 
+extract_patch:
+	@echo -n "Extracting patch from Empirical-Study-LLM-MR ... "
+	@git -C Empirical-Study-LLM-MR add --all
+	@git -C Empirical-Study-LLM-MR diff --staged > $(PWD)/patch/sut.patch
+	@git -C Empirical-Study-LLM-MR reset 2>&1 > /dev/null
+	@echo "OK."
+
 patch_sut:
 	@echo -n "Applying patches ... "
 	@git -C Empirical-Study-LLM-MR apply $(PWD)/patch/sut.patch
@@ -215,6 +225,7 @@ clean:
 	rm -f $(SCD_DIR)/schedule.out
 	rm -f $(SCD2_DIR)/schedule2.out
 	rm -f $(TCAS_DIR)/tcas.out
+	rm -f bin
 	rm -f check.log
 	cd $(GREP_DIR) && rm -rf grep-3.11 && cd - > /dev/null
 

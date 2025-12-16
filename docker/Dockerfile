@@ -22,7 +22,7 @@ RUN apt-get install -y software-properties-common
 
 RUN pip install IPython black isort beautifulsoup4 langchain-text-splitters langchain-community langgraph
 RUN pip install langchain-core langchain-openai pygraphviz marko sphinx sphinx-rtd-theme parameterized scipy
-RUN pip install opencv-python seaborn python-calamine seaborn timeout_decorator
+RUN pip install opencv-python seaborn python-calamine seaborn timeout_decorator clang==19.1.7
 
 # Install googletest
 RUN mkdir tools && pushd tools && \

@@ -3,7 +3,9 @@
 # Build and run a single test driver (C++, Java, Python) with options
 # for timeout, verbosity, and repetitions.
 
-source .env
+if [ -f .env ]; then
+	source .env
+fi
 
 DRIVER=           # Path to test driver
 TIMEOUT=5         # Timeout in seconds for each test driver

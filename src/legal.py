@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-12-16 20:53:06
 LastEditors  : Radon
-LastEditTime : 2025-12-17 16:19:52
+LastEditTime : 2025-12-17 17:07:25
 Description  : A helper script for MRC legality checks
 """
 
@@ -58,6 +58,7 @@ INTEREST_IMPORTS_JAVA = {
 INTEREST_FUNCS_PYTHON = {
     "f_oneway",  # f_oneway
     "rotate",  # rotate
+    "shortest_path", # shortest_path
     # Following are interest funcs for grep, Printtokens, Printtokens2, schedule,
     # shcedule2, and TCAS
     "popen",
@@ -324,9 +325,9 @@ def main(args: argparse.Namespace):
     if not filepath.suffix in legal_func_dict.keys():
         FATAL(f"File type {filepath.suffix} is not supported")
     if legal_func_dict[filepath.suffix](filepath):
-        SAYF("legal\n")
+        SAYF("LEGAL\n")
     else:
-        SAYF("illegal\n")
+        SAYF("ILLEGAL\n")
 
 
 if __name__ == "__main__":

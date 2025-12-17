@@ -46,5 +46,6 @@ for f in $(find $ROOTDIR -type f \( -name test_driver.cpp -o -name test_driver.p
     retval=$?
     if [ $retval -ne 0 ]; then
         res="error"
+    fi
     echo "$sut,$f,$res"
 done

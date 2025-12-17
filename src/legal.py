@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-12-16 20:53:06
 LastEditors  : Radon
-LastEditTime : 2025-12-17 17:07:25
+LastEditTime : 2025-12-17 20:32:36
 Description  : A helper script for MRC legality checks
 """
 
@@ -198,10 +198,14 @@ class JavaResolver:
         # If any of the interest functions are called twice or more from same qualifier,
         # we consider the MRC to be legal. This may not be precise in some cases but for
         # reference is enough.
+        func_dict = dict()
         for func in INTEREST_FUNCS_JAVA:
             for k, v in callee_dict.items():
-                if k.endswith(func) and v >= 2:
-                    return True
+                if k.endswith(func):
+                    func_dict[func] = func_dict.get(func, 0) + v
+        for _, v in func_dict.items():
+            if v >= 2:
+                return True
 
         # For complex cases like fastjson and jodatime, we check source of qualifier and
         # call count. If source imports is interested and call count >= 2, we consider legal.

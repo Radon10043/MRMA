@@ -18,7 +18,7 @@ RUN apt update
 RUN apt-get install -y wget curl make cmake gcc g++ git python3 python3-dev python3-pip
 RUN apt-get install -y vim build-essential libssl-dev openssl libffi-dev graphviz libgraphviz-dev
 RUN apt-get install -y python3-sphinx nodejs cloc jq unzip moreutils lsb-release
-RUN apt-get install -y software-properties-common
+RUN apt-get install -y software-properties-common meson pkg-config libcairo2-dev
 
 RUN pip install IPython black isort beautifulsoup4 langchain-text-splitters langchain-community langgraph
 RUN pip install langchain-core langchain-openai pygraphviz marko sphinx sphinx-rtd-theme parameterized scipy

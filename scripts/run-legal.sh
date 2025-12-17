@@ -1,15 +1,17 @@
 #!/bin/bash
 
+source ./scripts/utils.sh
+
 ROOTDIR=
 
 # Print help message
-print_help() {
+function print_help() {
     echo
     echo "Usage: $0 [ARGS]"
     echo "  Args (Required):"
-    echo "    -p, --path <ROOTDIR>  The root directory to search for test_driver.cpp, test_driver.py, and DriverTest.java."
+    echo "    -p, --path <PATH>  The root directory to search for test_driver.cpp, test_driver.py, and DriverTest.java."
     echo "  Args (Optional):"
-    echo "    -h, --help:           Show help message."
+    echo "    -h, --help:        Show help message."
     echo
 }
 
@@ -36,15 +38,13 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Run test drivers in batches
-echo "path,legality"
+echo "sut,path,legality"
 for f in $(find $ROOTDIR -type f \( -name test_driver.cpp -o -name test_driver.py -o -name DriverTest.java \) | sort); do
     res=""
-    output=$(python3 -m src.legal -f $f)
+    sut=$(get_sut_name $f)
+    res=$(python3 -m src.legal -f $f)
     retval=$?
     if [ $retval -ne 0 ]; then
         res="error"
-    else
-        res=$output
-    fi
-    echo "$f,$res"
+    echo "$sut,$f,$res"
 done

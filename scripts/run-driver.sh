@@ -11,7 +11,7 @@ VERBOSE=0         # Verbose mode
 REPEAT=20         # Number of repetitions for each test driver
 
 # Print help message
-print_help() {
+function print_help() {
 	echo
 	echo "Usage: $0 [ARGS]"
 	echo "  Args (Required):"
@@ -25,7 +25,7 @@ print_help() {
 }
 
 # Build C++ test driver
-build_cpp() {
+function build_cpp() {
 	local SRC=$1
 	local CXX=g++
 	local CXXFLAGS="-std=c++17 -static -pthread -Wall -Wextra -Werror"
@@ -36,13 +36,13 @@ build_cpp() {
 }
 
 # Run C++ test driver
-run_cpp() {
+function run_cpp() {
 	local BIN=$1
 	eval timeout --foreground $TIMEOUT $BIN
 }
 
 # Build Java test driver
-build_java() {
+function build_java() {
 	local JAVAPROJ=$1
 	local JAVAC="javac"
 	local JAVACFLAGS="-d $JAVAPROJ/bin -cp \"$JAVAPROJ/lib/*\""
@@ -52,14 +52,14 @@ build_java() {
 }
 
 # Run Java test driver
-run_java() {
+function run_java() {
 	local JAVAPROJ=$1
 	local JAVA=java
 	local JAVAFLAGS="-cp \"$JAVAPROJ/bin:$JAVAPROJ/lib/*\" org.junit.platform.console.ConsoleLauncher -disable-ansi-colors --scan-class-path"
 	eval timeout --foreground $TIMEOUT $JAVA $JAVAFLAGS
 }
 
-run_python() {
+function run_python() {
 	eval timeout --foreground $TIMEOUT python3 $DRIVER
 }
 

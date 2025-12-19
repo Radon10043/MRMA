@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2025-12-16 20:53:06
 LastEditors  : Radon
-LastEditTime : 2025-12-17 20:32:36
+LastEditTime : 2025-12-19 17:04:29
 Description  : A helper script for MRC legality checks
 """
 
@@ -11,8 +11,8 @@ import ast
 import pathlib
 import subprocess
 
-import javalang.parse
-import javalang.tree
+from tree_sitter import Language, Parser, Query, QueryCursor, Node
+import tree_sitter_java
 from clang.cindex import Config, Cursor, CursorKind, Index
 
 from .utils import *
@@ -58,7 +58,7 @@ INTEREST_IMPORTS_JAVA = {
 INTEREST_FUNCS_PYTHON = {
     "f_oneway",  # f_oneway
     "rotate",  # rotate
-    "shortest_path", # shortest_path
+    "shortest_path",  # shortest_path
     # Following are interest funcs for grep, Printtokens, Printtokens2, schedule,
     # shcedule2, and TCAS
     "popen",
@@ -134,9 +134,9 @@ class CppResolver:
 
 class JavaResolver:
     def __init__(self):
-        pass
+        self.lang = Language(tree_sitter_java.language())
 
-    def get_var_type(self, root: javalang.tree.MethodDeclaration, name: str) -> str | None:
+    def _get_var_type(self, root: Node) -> str | None:
         """Get type of given variable
 
         Parameters
@@ -151,24 +151,34 @@ class JavaResolver:
         str | None
             Variable type if name can be found, else None
         """
-        # Check local variable declarations
-        for _, node in root.filter(javalang.tree.LocalVariableDeclaration):
-            for _, decl in node.filter(javalang.tree.VariableDeclarator):
-                var_type = getattr(getattr(node, "type", None), "name", None)
-                var_name = getattr(decl, "name", None)
-                if name == var_name:
-                    return var_type
-
-        # Check method parameters
-        params = getattr(root, "parameters", None)
-        if params is None:
+        b = root.text
+        if b is None:
             return None
-        for param in params:
-            param_type = getattr(getattr(param, "type", None), "name", None)
-            param_name = getattr(param, "name", None)
-            if name == param_name:
-                return param_type
-        return None
+        name = b.decode("utf-8")
+
+        curr = root
+        while curr:
+            # Is local variable enough?
+            q_scm = f"""
+            (local_variable_declaration
+                type: (_) @type_node
+                declarator: (variable_declarator
+                    name: (identifier) @decl_name
+                    (#eq? @decl_name "{name}")
+                )
+            )
+            """
+            q = Query(self.lang, q_scm)
+            qc = QueryCursor(q)
+            captures = qc.captures(curr)
+            if "type_node" in captures:
+                type_node = captures["type_node"][0]
+                b = type_node.text
+                if not b is None:
+                    return b.decode("utf-8").split("<")[0]
+            curr = curr.parent
+
+        return name
 
     def check_legal(self, filepath: pathlib.Path) -> bool:
         """Check legality of an encoded MRC written in Java
@@ -183,50 +193,55 @@ class JavaResolver:
         bool
             True if legal, False otherwise
         """
-        code = filepath.read_text()
-        tree = javalang.parse.parse(code)
-        callee_dict = dict()  # {qualifier.member: count}
-        vars = list()
-        for _, node in tree.filter(javalang.tree.MethodInvocation):
-            qualifier = getattr(node, "qualifier")
-            member = getattr(node, "member")
-            key = f"{qualifier}.{member}"
-            callee_dict[key] = callee_dict.get(key, 0) + 1
-            if qualifier and qualifier != "":
-                vars.append(qualifier)
+        parser = Parser(self.lang)
+        code = filepath.read_bytes()
+        tree = parser.parse(code)
 
         # If any of the interest functions are called twice or more from same qualifier,
         # we consider the MRC to be legal. This may not be precise in some cases but for
         # reference is enough.
-        func_dict = dict()
+        callee_dict = dict()  # {callee: count}
+        q_scm = """
+        (method_invocation
+            object: (identifier) @var_name
+            name: (identifier) @callee
+        )
+        """
+        q = Query(self.lang, q_scm)
+        qc = QueryCursor(q)
+        captures = qc.captures(tree.root_node)
+        for callee in captures["callee"]:
+            b = callee.text
+            if not b is None:
+                name = b.decode("utf-8")
+                callee_dict[name] = callee_dict.get(name, 0) + 1
         for func in INTEREST_FUNCS_JAVA:
-            for k, v in callee_dict.items():
-                if k.endswith(func):
-                    func_dict[func] = func_dict.get(func, 0) + v
-        for _, v in func_dict.items():
-            if v >= 2:
+            if callee_dict.get(func, 0) >= 2:
                 return True
 
         # For complex cases like fastjson and jodatime, we check source of qualifier and
         # call count. If source imports is interested and call count >= 2, we consider legal.
         # First let's collect used variable types
         var_types = list()
-        for var in vars:
-            var_type = None
-            for _, node in tree.filter(javalang.tree.MethodDeclaration):
-                if not isinstance(node, javalang.tree.MethodDeclaration):
-                    continue
-                var_type = self.get_var_type(node, var)
-                if not var_type is None:
-                    break
+        for var in captures["var_name"]:
+            var_type = self._get_var_type(var)
             var_types.append(var_type if not var_type is None else var)
 
         # Map used variable types to imports
+        q_scm = """
+        (import_declaration
+            (scoped_identifier) @import_name
+        )
+        """
         import_dict = dict()  # {import name: call count}
-        for _, node in tree.filter(javalang.tree.Import):
-            import_name = getattr(node, "path", None)
-            if import_name is None:
+        q = Query(self.lang, q_scm)
+        qc = QueryCursor(q)
+        captures = qc.captures(tree.root_node)
+        for import_names in captures["import_name"]:
+            b = import_names.text
+            if b is None:
                 continue
+            import_name = b.decode("utf-8")
             for var_type in var_types:
                 if import_name.endswith(var_type):
                     import_dict[import_name] = import_dict.get(import_name, 0) + 1

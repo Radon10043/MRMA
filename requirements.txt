@@ -12,6 +12,7 @@ beautifulsoup4==4.13.5
 black==25.1.0
 blinker==1.4
 certifi==2020.6.20
+cffi==2.0.0
 chardet==4.0.0
 charset-normalizer==3.4.3
 clang==19.1.7
@@ -23,7 +24,7 @@ dataclasses-json==0.6.7
 dbus-python==1.2.18
 decorator==5.2.1
 distro==1.9.0
-distro-info==1.1+ubuntu0.2
+distro-info==1.0
 docutils==0.21.2
 exceptiongroup==1.3.0
 executing==2.2.0
@@ -40,7 +41,6 @@ imagesize==1.3.0
 importlib-metadata==4.6.4
 ipython==8.37.0
 isort==6.0.1
-javalang==0.13.0
 jedi==0.19.2
 jeepney==0.7.1
 Jinja2==3.1.6
@@ -85,13 +85,13 @@ parso==0.8.5
 pathspec==0.12.1
 pexpect==4.9.0
 Pillow==9.0.1
-pip==25.3
 platformdirs==4.4.0
 prompt_toolkit==3.0.52
 propcache==0.3.2
 ptyprocess==0.7.0
 pure_eval==0.2.3
 pycairo==1.29.0
+pycparser==2.23
 pydantic==2.11.7
 pydantic-settings==2.10.1
 pydantic_core==2.33.2
@@ -100,7 +100,6 @@ PyGObject==3.42.1
 pygraphviz==1.11
 PyJWT==2.3.0
 pyparsing==2.4.7
-python-apt==2.4.0+ubuntu4.1
 python-calamine==0.4.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.1
@@ -113,7 +112,6 @@ roman==3.3
 scipy==1.15.3
 seaborn==0.13.2
 SecretStorage==3.3.1
-setuptools==59.6.0
 six==1.16.0
 sniffio==1.3.1
 snowballstemmer==2.2.0
@@ -135,15 +133,15 @@ timeout-decorator==0.5.0
 tomli==2.2.1
 tqdm==4.67.1
 traitlets==5.14.3
+tree-sitter==0.25.2
+tree-sitter-java==0.23.5
 typing-inspect==0.9.0
 typing-inspection==0.4.1
 typing_extensions==4.15.0
 tzdata==2025.2
-unattended-upgrades==0.1
 urllib3==1.26.5
 wadllib==1.3.6
 wcwidth==0.2.13
-wheel==0.37.1
 xxhash==3.5.0
 yarl==1.20.1
 zipp==1.0.0

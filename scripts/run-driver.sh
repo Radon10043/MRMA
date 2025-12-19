@@ -7,10 +7,10 @@ if [ -f .env ]; then
 	source .env
 fi
 
-DRIVER=   # Path to test driver
-TIMEOUT=5 # Timeout in seconds for each test driver
-VERBOSE=0 # Verbose mode
-REPEAT=20 # Number of repetitions for each test driver
+DRIVER=    	# Path to test driver
+TIMEOUT=10 	# Timeout in seconds for each test driver
+VERBOSE=0  	# Verbose mode
+REPEAT=20 	# Number of repetitions for each test driver
 
 # Print help message
 function print_help() {

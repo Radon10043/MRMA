@@ -15,14 +15,17 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 WORKDIR /home
 
 RUN apt update
-RUN apt-get install -y wget curl make cmake gcc g++ git python3 python3-dev python3-pip
+RUN apt-get install -y wget curl make cmake gcc g++ git python3 python3-dev python3-pip python3.10-venv
 RUN apt-get install -y vim build-essential libssl-dev openssl libffi-dev graphviz libgraphviz-dev
-RUN apt-get install -y python3-sphinx nodejs cloc jq unzip moreutils lsb-release
-RUN apt-get install -y software-properties-common meson pkg-config libcairo2-dev
+RUN apt-get install -y python3-sphinx nodejs cloc jq unzip moreutils lsb-release libgirepository1.0-dev
+RUN apt-get install -y software-properties-common meson pkg-config libcairo2-dev libdbus-1-dev
 
-RUN pip install IPython black isort beautifulsoup4 langchain-text-splitters langchain-community langgraph
-RUN pip install langchain-core langchain-openai pygraphviz marko sphinx sphinx-rtd-theme parameterized scipy
-RUN pip install opencv-python seaborn python-calamine seaborn timeout_decorator clang==19.1.7 javalang
+RUN pip install IPython black isort beautifulsoup4 pygraphviz marko sphinx sphinx-rtd-theme javalang
+RUN pip install parameterized scipy opencv-python seaborn python-calamine seaborn timeout_decorator
+
+RUN pip install langchain-text-splitters==0.3.9 langchain-community==0.3.29 langgraph==0.6.6
+RUN pip install langchain-core==0.3.75 langchain-openai==0.3.32 clang==19.1.7
+RUN pip install tree-sitter==0.25.2 tree-sitter-java==0.23.5
 
 # Install googletest
 RUN mkdir tools && pushd tools && \

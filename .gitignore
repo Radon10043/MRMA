@@ -276,6 +276,6 @@ pyrightconfig.json
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.txt
-workdir/*
-tmp/*
-bin/*
+workdir/
+tmp/
+bin/

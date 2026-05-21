@@ -279,3 +279,4 @@ pyrightconfig.json
 workdir/
 tmp/
 bin/
+src/viz/*.pdf

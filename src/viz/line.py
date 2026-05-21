@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
+FONT_SERIF = ["Times New Roman", "Times", "Liberation Serif", "DejaVu Serif"]
 LABEL_FONT_SIZE = 26
 TICK_FONT_SIZE = 22
 LEGEND_FONT_SIZE = 22
@@ -91,6 +92,8 @@ def plot_legal_chart(plot_df: pd.DataFrame):
     sns.set_theme(
         style="white",
         rc={
+            "font.family": "serif",
+            "font.serif": FONT_SERIF,
             "axes.labelsize": LABEL_FONT_SIZE,
             "xtick.labelsize": TICK_FONT_SIZE,
             "ytick.labelsize": TICK_FONT_SIZE,
@@ -166,6 +169,8 @@ def plot_corr_rate(plot_df: pd.DataFrame):
     sns.set_theme(
         style="white",
         rc={
+            "font.family": "serif",
+            "font.serif": FONT_SERIF,
             "axes.labelsize": LABEL_FONT_SIZE,
             "xtick.labelsize": TICK_FONT_SIZE,
             "ytick.labelsize": TICK_FONT_SIZE,

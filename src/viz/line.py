@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2026-05-21 19:54:42
 LastEditors  : Radon
-LastEditTime : 2026-05-21 22:16:49
+LastEditTime : 2026-05-23 21:52:43
 Description  : Plot line chart
 """
 import argparse
@@ -142,7 +142,7 @@ def plot_legal_chart(plot_df: pd.DataFrame):
             text.set_fontsize(LEGEND_FONT_SIZE)
 
     fig.tight_layout()
-    fig.savefig(os.path.join(os.path.dirname(__file__), "legal.pdf"), dpi=300)
+    fig.savefig(os.path.join(os.path.dirname(__file__), "line-legal.pdf"), dpi=300)
     plt.close(fig)
 
 
@@ -219,7 +219,7 @@ def plot_corr_rate(plot_df: pd.DataFrame):
             text.set_fontsize(LEGEND_FONT_SIZE)
 
     fig.tight_layout()
-    fig.savefig(os.path.join(os.path.dirname(__file__), "correct.pdf"), dpi=300)
+    fig.savefig(os.path.join(os.path.dirname(__file__), "line-correct.pdf"), dpi=300)
     plt.close(fig)
 
 

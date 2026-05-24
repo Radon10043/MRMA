@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2026-05-23 21:03:00
 LastEditors  : Radon
-LastEditTime : 2026-05-24 00:13:45
+LastEditTime : 2026-05-24 12:57:38
 Description  : Plot legal-rate and correct-rate heatmap charts
 """
 
@@ -24,14 +24,14 @@ METRICS = {
     "legal": {
         "source_col": "legal",
         "rate_col": "legal_rate",
-        "x_label": "Legal Rate",
+        "x_label": "LR (%)",
         "cbar_label": "Legal rate (%)",
         "output": "heatmap-legal.pdf",
     },
     "correct": {
         "source_col": "correct",
         "rate_col": "corr_rate",
-        "x_label": "Correct Rate",
+        "x_label": "CR (%)",
         "cbar_label": "Correct rate (%)",
         "output": "heatmap-corr.pdf",
     },
@@ -119,7 +119,7 @@ def plot_heatmap_chart(plot_df: pd.DataFrame, metric: str):
         )
 
         ax.set_title(group, fontsize=LABEL_FONT_SIZE, pad=12)
-        ax.set_xlabel(metric_cfg["x_label"], fontsize=LABEL_FONT_SIZE)
+        ax.set_xlabel("")
         ax.set_ylabel("")
         ax.tick_params(axis="x", labelsize=TICK_FONT_SIZE, rotation=45)
         ax.tick_params(axis="y", labelsize=TICK_FONT_SIZE, rotation=0)
@@ -132,7 +132,9 @@ def plot_heatmap_chart(plot_df: pd.DataFrame, metric: str):
             cbar.ax.tick_params(labelsize=CBAR_FONT_SIZE)
             cbar.ax.yaxis.label.set_size(CBAR_FONT_SIZE)
 
+    fig.supxlabel(metric_cfg["x_label"], fontsize=LABEL_FONT_SIZE, y=0.035)
     fig.tight_layout()
+    fig.subplots_adjust(bottom=0.13)
     fig.savefig(os.path.join(os.path.dirname(__file__), metric_cfg["output"]), dpi=300)
     plt.close(fig)
 

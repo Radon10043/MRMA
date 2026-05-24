@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2026-05-21 19:54:42
 LastEditors  : Radon
-LastEditTime : 2026-05-23 21:52:43
+LastEditTime : 2026-05-24 20:18:38
 Description  : Plot line chart
 """
 import argparse
@@ -30,6 +30,38 @@ GROUP_PALETTE = {
     "hybrid": "#ff7f0e",
     "open": "#808080",
 }
+
+
+def place_top_legend(ax):
+    """Place the group legend above the chart in one horizontal row."""
+    handles, labels = ax.get_legend_handles_labels()
+    legend_items = {
+        label: handle
+        for handle, label in zip(handles, labels)
+        if label in GROUP_ORDER
+    }
+    ordered_labels = [label for label in GROUP_ORDER if label in legend_items]
+    ordered_handles = [legend_items[label] for label in ordered_labels]
+
+    old_legend = ax.get_legend()
+    if old_legend:
+        old_legend.remove()
+
+    if not ordered_handles:
+        return
+
+    ax.legend(
+        ordered_handles,
+        ordered_labels,
+        title=None,
+        loc="upper center",
+        bbox_to_anchor=(0.5, 1.42),
+        ncol=len(ordered_labels),
+        frameon=False,
+        fontsize=LEGEND_FONT_SIZE,
+        columnspacing=1.6,
+        handlelength=2.2,
+    )
 
 
 def process_csv(csv_path: str) -> pd.DataFrame:
@@ -102,7 +134,7 @@ def plot_legal_chart(plot_df: pd.DataFrame):
         },
     )
 
-    fig, ax = plt.subplots(figsize=(30, 10))
+    fig, ax = plt.subplots(figsize=(30, 7))
     sns.lineplot(
         x="sut",
         y="legal_rate_pct",
@@ -120,10 +152,10 @@ def plot_legal_chart(plot_df: pd.DataFrame):
         markersize=MARKER_SIZE,
     )
 
-    ax.set_xlabel("Software Under Test", fontsize=LABEL_FONT_SIZE)
+    ax.set_xlabel("")
     ax.set_ylabel("LR (%)", fontsize=LABEL_FONT_SIZE)
     ax.set_ylim(0, 105)
-    ax.set_yticks(range(0, 105, 10))
+    ax.set_yticks(range(0, 105, 20))
     ax.tick_params(axis="both", labelsize=TICK_FONT_SIZE)
     ax.grid(False)
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right")
@@ -133,16 +165,10 @@ def plot_legal_chart(plot_df: pd.DataFrame):
         spine.set_color("black")
         spine.set_linewidth(1.5)
 
-    legend = ax.get_legend()
-    if legend:
-        legend.set_title("Group")
-        legend.set_loc("lower left")
-        legend.get_title().set_fontsize(LEGEND_TITLE_FONT_SIZE)
-        for text in legend.get_texts():
-            text.set_fontsize(LEGEND_FONT_SIZE)
+    place_top_legend(ax)
 
     fig.tight_layout()
-    fig.savefig(os.path.join(os.path.dirname(__file__), "line-legal.pdf"), dpi=300)
+    fig.savefig(os.path.join(os.path.dirname(__file__), "line-legal.pdf"), dpi=300, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -179,7 +205,7 @@ def plot_corr_rate(plot_df: pd.DataFrame):
         },
     )
 
-    fig, ax = plt.subplots(figsize=(30, 10))
+    fig, ax = plt.subplots(figsize=(30, 7))
     sns.lineplot(
         x="sut",
         y="corr_rate_pct",
@@ -197,10 +223,10 @@ def plot_corr_rate(plot_df: pd.DataFrame):
         markersize=MARKER_SIZE,
     )
 
-    ax.set_xlabel("Software Under Test", fontsize=LABEL_FONT_SIZE)
+    ax.set_xlabel("")
     ax.set_ylabel("CR (%)", fontsize=LABEL_FONT_SIZE)
     ax.set_ylim(0, 105)
-    ax.set_yticks(range(0, 105, 10))
+    ax.set_yticks(range(0, 105, 20))
     ax.tick_params(axis="both", labelsize=TICK_FONT_SIZE)
     ax.grid(False)
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right")
@@ -210,16 +236,10 @@ def plot_corr_rate(plot_df: pd.DataFrame):
         spine.set_color("black")
         spine.set_linewidth(1.5)
 
-    legend = ax.get_legend()
-    if legend:
-        legend.set_title("Group")
-        legend.set_loc("lower left")
-        legend.get_title().set_fontsize(LEGEND_TITLE_FONT_SIZE)
-        for text in legend.get_texts():
-            text.set_fontsize(LEGEND_FONT_SIZE)
+    place_top_legend(ax)
 
     fig.tight_layout()
-    fig.savefig(os.path.join(os.path.dirname(__file__), "line-correct.pdf"), dpi=300)
+    fig.savefig(os.path.join(os.path.dirname(__file__), "line-correct.pdf"), dpi=300, bbox_inches="tight")
     plt.close(fig)
 
 

@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2026-05-21 22:20:21
 LastEditors  : Radon
-LastEditTime : 2026-05-22 01:02:53
+LastEditTime : 2026-05-24 20:55:01
 Description  : Plot bar chart
 """
 
@@ -71,7 +71,7 @@ def plot_bar_chart(plot_df: pd.DataFrame):
     chart_df["new_rate_pct"] = chart_df["new_rate"] * 100
 
     sns.set_theme(style="ticks", rc={"font.family": "serif", "font.serif": FONT_SERIF})
-    fig, ax = plt.subplots(figsize=(20, 4))
+    fig, ax = plt.subplots(figsize=(20, 3))
     sns.barplot(
         data=chart_df,
         x="sut",

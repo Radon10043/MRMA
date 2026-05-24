@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2026-05-21 22:20:21
 LastEditors  : Radon
-LastEditTime : 2026-05-22 00:33:17
+LastEditTime : 2026-05-24 20:28:36
 Description  : Plot box chart
 """
 
@@ -23,6 +23,24 @@ GROUP_PALETTE = {
     "hybrid": "#fdd0a2",
     "open": "#bdbdbd",
 }
+TYPE_ORDER = ["numerical", "non-numerical", "other"]
+FREQUENCY_ORDER = ["low", "high"]
+
+
+def read_data_csv(csv_path: str) -> pd.DataFrame:
+    """Read the CSV file and normalize rows with a duplicated frequency field."""
+
+    def fix_bad_line(row: list[str]) -> list[str] | None:
+        if len(row) == 12 and row[1] == row[2]:
+            return row[:2] + row[3:]
+        return None
+
+    return pd.read_csv(
+        csv_path,
+        dtype={"legal": str, "correct": str, "new": str},
+        engine="python",
+        on_bad_lines=fix_bad_line,
+    )
 
 
 def process_csv(csv_path: str) -> pd.DataFrame:
@@ -38,41 +56,46 @@ def process_csv(csv_path: str) -> pd.DataFrame:
     pd.DataFrame
         Processed dataframe
     """
-    df = pd.read_csv(csv_path, dtype={"legal": str, "correct": str, "new": str})
+    df = read_data_csv(csv_path)
     conds = df["group"].isin(["close", "hybrid", "open"]) & (df["temperature"] == 1.0) & (df["top_p"] == 1.0) & (df["confidence"] == "EXP")
     tmp_df = df[conds]
     datalist = list()
-    for sut in tmp_df["sut"].unique():
-        for group in tmp_df["group"].unique():
-            sub_df = tmp_df[(tmp_df["sut"] == sut) & (tmp_df["group"] == group)]
-            sut_type = sub_df["type"].iloc[0]
-            total_cand = len(sub_df)
-            legal_cand = len(sub_df[sub_df["legal"] == "TRUE"])
-            corr_cand = len(sub_df[sub_df["correct"] == "TRUE"])
-            legal_rate = legal_cand / total_cand if total_cand > 0 else 0
-            corr_rate = corr_cand / total_cand if total_cand > 0 else 0
-            datalist.append([sut, group, sut_type, legal_rate, corr_rate])
-    proc_df = pd.DataFrame(datalist, columns=["sut", "group", "type", "legal_rate", "corr_rate"])
+    for (sut, group), sub_df in tmp_df.groupby(["sut", "group"], sort=False):
+        sut_frequency = sub_df["frequency"].iloc[0]
+        sut_type = sub_df["type"].iloc[0]
+        total_cand = len(sub_df)
+        legal_cand = len(sub_df[sub_df["legal"] == "TRUE"])
+        corr_cand = len(sub_df[sub_df["correct"] == "TRUE"])
+        legal_rate = legal_cand / total_cand if total_cand > 0 else 0
+        corr_rate = corr_cand / total_cand if total_cand > 0 else 0
+        datalist.append([sut, group, sut_frequency, sut_type, legal_rate, corr_rate])
+    proc_df = pd.DataFrame(datalist, columns=["sut", "group", "frequency", "type", "legal_rate", "corr_rate"])
     return proc_df
 
 
-def plot_box_chart(plot_df: pd.DataFrame):
+def plot_box_chart(plot_df: pd.DataFrame, x_col: str, output_name: str, order: list[str] | None = None):
     """Plot box chart for different type of SUT
 
     Parameters
     ----------
     plot_df : pd.DataFrame
         Processed dataframe for plotting
+    x_col : str
+        Column used as the x-axis category
+    output_name : str
+        Output PDF file name
+    order : list[str] | None
+        Explicit x-axis category order
     """
     chart_df = plot_df.copy()
     chart_df["legal_rate_pct"] = chart_df["legal_rate"] * 100
     chart_df["corr_rate_pct"] = chart_df["corr_rate"] * 100
 
     sns.set_theme(style="ticks", rc={"font.family": "serif", "font.serif": FONT_SERIF})
-    fig, axes = plt.subplots(1, 2, figsize=(13, 7), sharex=True)
+    fig, axes = plt.subplots(1, 2, figsize=(13, 5), sharex=True)
     common_kwargs = {
         "data": chart_df,
-        "x": "type",
+        "x": x_col,
         "hue": "group",
         "hue_order": GROUP_ORDER,
         "palette": GROUP_PALETTE,
@@ -88,6 +111,8 @@ def plot_box_chart(plot_df: pd.DataFrame):
             "markersize": 4,
         },
     }
+    if order:
+        common_kwargs["order"] = [item for item in order if item in chart_df[x_col].unique()]
 
     sns.boxplot(y="legal_rate_pct", ax=axes[0], **common_kwargs)
     sns.boxplot(y="corr_rate_pct", ax=axes[1], **common_kwargs)
@@ -119,7 +144,7 @@ def plot_box_chart(plot_df: pd.DataFrame):
 
     fig.tight_layout()
     fig.subplots_adjust(top=0.88, wspace=0.35)
-    fig.savefig(os.path.join(os.path.dirname(__file__), "box.pdf"), dpi=300)
+    fig.savefig(os.path.join(os.path.dirname(__file__), output_name), dpi=300)
     plt.close(fig)
 
 
@@ -132,7 +157,8 @@ def main(args: argparse.Namespace):
         Command arguments
     """
     plot_df = process_csv(args.csv)
-    plot_box_chart(plot_df)
+    plot_box_chart(plot_df, "type", "box-type.pdf", TYPE_ORDER)
+    plot_box_chart(plot_df, "frequency", "box-freq.pdf", FREQUENCY_ORDER)
 
 
 if __name__ == "__main__":

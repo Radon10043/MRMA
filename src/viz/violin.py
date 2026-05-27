@@ -2,22 +2,89 @@
 Author       : Radon
 Date         : 2026-05-23 19:32:48
 LastEditors  : Radon
-LastEditTime : 2026-05-23 19:55:19
+LastEditTime : 2026-05-27 18:07:26
 Description  : Plot violin chart
 """
 
 import argparse
 import os
+from functools import lru_cache
+from io import BytesIO
 
+import cairosvg
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sns
+from matplotlib.offsetbox import AnnotationBbox, OffsetImage
+from PIL import Image
 
 FONT_SERIF = ["Times New Roman", "Times", "Liberation Serif", "DejaVu Serif"]
 LABEL_FONT_SIZE = 24
 TICK_FONT_SIZE = 20
 LEGEND_FONT_SIZE = 20
 METRIC_ORDER = ["LR", "CR"]
+ICON_SIZE = 72
+ICON_ZOOM = 0.28
+ICON_X_OFFSET = 0
+ICON_Y_OFFSET = 0
+MODEL_VENDOR_PATTERNS = (
+    ("openai", ("chatgpt", "gpt", "o3", "o4")),
+    ("anthropic", ("claude",)),
+    ("deepseek", ("deepseek",)),
+    ("google", ("gemini",)),
+    ("zai", ("glm",)),
+    ("xai", ("grok",)),
+    ("hunyuan", ("hunyuan",)),
+    ("moonshot", ("kimi",)),
+    ("qwen", ("qwen",)),
+)
+
+
+@lru_cache(maxsize=None)
+def load_svg_icon(svg_path: str, size: int = ICON_SIZE) -> np.ndarray:
+    """Convert an SVG icon to a transparent RGBA array for Matplotlib."""
+    png_data = cairosvg.svg2png(url=svg_path, output_width=size, output_height=size)
+    image = Image.open(BytesIO(png_data)).convert("RGBA") # type: ignore
+    return np.asarray(image)
+
+
+def vendor_for_model(model_name: str) -> str | None:
+    plain_name = model_name.removeprefix("single_").lower()
+    for vendor, patterns in MODEL_VENDOR_PATTERNS:
+        if any(pattern in plain_name for pattern in patterns):
+            return vendor
+    return None
+
+
+def add_vendor_icons(fig, ax, labels: list[str]):
+    """Add provider icons before model-name tick labels."""
+    icon_dir = os.path.join(os.path.dirname(__file__), "icons")
+    renderer = fig.canvas.get_renderer()
+    for tick_label, label in zip(ax.get_xticklabels(), labels):
+        vendor = vendor_for_model(label)
+        if vendor is None:
+            continue
+
+        icon_path = os.path.join(icon_dir, f"{vendor}.svg")
+        if not os.path.exists(icon_path):
+            continue
+
+        label_bbox = tick_label.get_window_extent(renderer=renderer)
+        icon_x = label_bbox.x0 + ICON_X_OFFSET
+        icon_y = label_bbox.y0 + ICON_Y_OFFSET
+        icon_xy = fig.transFigure.inverted().transform((icon_x, icon_y))
+        icon = OffsetImage(load_svg_icon(icon_path), zoom=ICON_ZOOM)
+        icon_box = AnnotationBbox(
+            icon,
+            icon_xy,
+            xycoords=fig.transFigure,
+            frameon=False,
+            pad=0,
+            box_alignment=(1, 0.5),
+            annotation_clip=False,
+        )
+        fig.add_artist(icon_box)
 
 
 def process_csv(csv_path: str) -> pd.DataFrame:
@@ -80,9 +147,10 @@ def plot_violin_chart(plot_df: pd.DataFrame):
     ax.set_xlabel("")
     ax.set_ylabel("Rate (%)", fontsize=LABEL_FONT_SIZE)
     ax.tick_params(axis="both", which="both", labelsize=TICK_FONT_SIZE, colors="black", length=6, width=1.5)
+    tick_labels = [label.get_text().removeprefix("single_") for label in ax.get_xticklabels()]
     ax.set_xticks(
         ax.get_xticks(),
-        [label.get_text().removeprefix("single_") for label in ax.get_xticklabels()],
+        tick_labels,
         rotation=45,
         ha="right",
         rotation_mode="anchor",
@@ -103,7 +171,9 @@ def plot_violin_chart(plot_df: pd.DataFrame):
         )
 
     fig.tight_layout()
-    fig.subplots_adjust(bottom=0.36)
+    fig.subplots_adjust(bottom=0.42)
+    fig.canvas.draw()
+    add_vendor_icons(fig, ax, tick_labels)
     fig.savefig(os.path.join(os.path.dirname(__file__), "violin.pdf"), dpi=300)
     plt.close(fig)
 

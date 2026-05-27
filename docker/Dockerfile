@@ -18,7 +18,8 @@ RUN apt update
 RUN apt-get install -y wget curl make cmake gcc g++ git python3 python3-dev python3-pip python3.10-venv
 RUN apt-get install -y vim build-essential libssl-dev openssl libffi-dev graphviz libgraphviz-dev
 RUN apt-get install -y python3-sphinx nodejs cloc jq unzip moreutils lsb-release libgirepository1.0-dev
-RUN apt-get install -y software-properties-common meson pkg-config libcairo2-dev libdbus-1-dev
+RUN apt-get install -y software-properties-common meson pkg-config libcairo2-dev libdbus-1-dev ripgrep
+RUN apt-get install -y cairosvg
 
 RUN pip install IPython black isort beautifulsoup4 pygraphviz marko sphinx sphinx-rtd-theme javalang
 RUN pip install parameterized scipy opencv-python seaborn python-calamine seaborn timeout_decorator
@@ -46,3 +47,7 @@ RUN wget https://apt.llvm.org/llvm.sh && \
     chmod +x llvm.sh && \
     ./llvm.sh 19 all && \
     rm llvm.sh
+
+# Install fzf
+RUN git clone --depth 1 https://github.com/junegunn/fzf.git /root/.fzf && \
+    yes | /root/.fzf/install

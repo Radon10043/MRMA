@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2026-05-23 20:02:31
 LastEditors  : Radon
-LastEditTime : 2026-05-23 20:28:29
+LastEditTime : 2026-05-28 19:31:34
 Description  : Plot pairgrid chart
 """
 import argparse
@@ -18,10 +18,10 @@ TICK_FONT_SIZE = 18
 TITLE_FONT_SIZE = 22
 LEGEND_FONT_SIZE = 20
 CONFIDENCE_ORDER = ["EXP", "QUA", "LOG", "LIN", "VAN"]
-METRIC_ORDER = ["Legal rate", "Correct rate"]
+METRIC_ORDER = ["LR (%)", "CR (%)"]
 METRIC_PALETTE = {
-    "Legal rate": "#1f77b4",
-    "Correct rate": "#ff7f0e",
+    "LR (%)": "#1f77b4",
+    "CR (%)": "#ff7f0e",
 }
 
 
@@ -50,8 +50,8 @@ def process_csv(csv_path: str) -> pd.DataFrame:
             corr_cand = len(sub_df[sub_df["correct"] == "TRUE"])
             legal_rate = legal_cand / total_cand if total_cand > 0 else 0
             corr_rate = corr_cand / total_cand if total_cand > 0 else 0
-            datalist.append([sut, conf, "Legal rate", legal_rate])
-            datalist.append([sut, conf, "Correct rate", corr_rate])
+            datalist.append([sut, conf, "LR (%)", legal_rate])
+            datalist.append([sut, conf, "CR (%)", corr_rate])
     proc_df = pd.DataFrame(datalist, columns=["sut", "confidence", "metric", "rate"])
     return proc_df
 
@@ -71,7 +71,7 @@ def plot_pairgrid_chart(plot_df: pd.DataFrame):
     confidence_order.extend(conf for conf in chart_df["confidence"].unique() if conf not in confidence_order)
     sut_order = chart_df["sut"].drop_duplicates().tolist()
     y_pos = {sut: idx for idx, sut in enumerate(sut_order)}
-    metric_offsets = {"Legal rate": -0.14, "Correct rate": 0.14}
+    metric_offsets = {"LR (%)": -0.14, "CR (%)": 0.14}
     wide_df = chart_df.pivot(index=["sut", "metric"], columns="confidence", values="rate_pct").reset_index()
     wide_df.columns.name = None
 
@@ -140,7 +140,6 @@ def plot_pairgrid_chart(plot_df: pd.DataFrame):
         frameon=False,
         fontsize=LEGEND_FONT_SIZE,
     )
-    fig.supxlabel("Rate (%)", fontsize=LABEL_FONT_SIZE, y=0.02)
 
     fig.tight_layout()
     fig.subplots_adjust(top=0.92, bottom=0.09, wspace=0.22)

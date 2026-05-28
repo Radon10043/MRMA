@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2026-05-23 20:02:31
 LastEditors  : Radon
-LastEditTime : 2026-05-28 19:31:34
+LastEditTime : 2026-05-28 22:04:18
 Description  : Plot pairgrid chart
 """
 import argparse
@@ -17,7 +17,7 @@ LABEL_FONT_SIZE = 24
 TICK_FONT_SIZE = 18
 TITLE_FONT_SIZE = 22
 LEGEND_FONT_SIZE = 20
-CONFIDENCE_ORDER = ["EXP", "QUA", "LOG", "LIN", "VAN"]
+CONFIDENCE_ORDER = ["EXP", "QUA", "LOG", "LIN", "HAF"]
 METRIC_ORDER = ["LR (%)", "CR (%)"]
 METRIC_PALETTE = {
     "LR (%)": "#1f77b4",

@@ -22,7 +22,8 @@ RUN apt-get install -y software-properties-common meson pkg-config libcairo2-dev
 RUN apt-get install -y cairosvg
 
 RUN pip install IPython black isort beautifulsoup4 pygraphviz marko sphinx sphinx-rtd-theme javalang
-RUN pip install parameterized scipy opencv-python seaborn python-calamine seaborn timeout_decorator
+RUN pip install parameterized scipy opencv-python seaborn python-calamine timeout_decorator matplotlib
+RUN pip install pandas
 
 RUN pip install langchain-text-splitters==0.3.9 langchain-community==0.3.29 langgraph==0.6.6
 RUN pip install langchain-core==0.3.75 langchain-openai==0.3.32 clang==19.1.7

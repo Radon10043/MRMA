@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2026-05-23 21:03:00
 LastEditors  : Radon
-LastEditTime : 2026-05-24 12:57:38
+LastEditTime : 2026-06-05 16:36:51
 Description  : Plot legal-rate and correct-rate heatmap charts
 """
 
@@ -18,6 +18,7 @@ FONT_SERIF = ["Times New Roman", "Times", "Liberation Serif", "DejaVu Serif"]
 LABEL_FONT_SIZE = 24
 TICK_FONT_SIZE = 18
 CBAR_FONT_SIZE = 18
+ANNOT_FONT_SIZE = 14
 DEFAULT_GROUPS = ["close", "hybrid", "open"]
 DEFAULT_CONFIDENCE = "EXP"
 METRICS = {
@@ -25,14 +26,14 @@ METRICS = {
         "source_col": "legal",
         "rate_col": "legal_rate",
         "x_label": "LR (%)",
-        "cbar_label": "Legal rate (%)",
+        "cbar_label": "LR (%)",
         "output": "heatmap-legal.pdf",
     },
     "correct": {
         "source_col": "correct",
         "rate_col": "corr_rate",
         "x_label": "CR (%)",
-        "cbar_label": "Correct rate (%)",
+        "cbar_label": "CR (%)",
         "output": "heatmap-corr.pdf",
     },
 }
@@ -85,7 +86,7 @@ def plot_heatmap_chart(plot_df: pd.DataFrame, metric: str):
     sut_order = sorted(plot_df["sut"].unique(), key=str.lower)
     group_order = [group for group in DEFAULT_GROUPS if group in plot_df["group"].unique()]
 
-    sns.set_theme(style="white", rc={"font.family": "serif", "font.serif": FONT_SERIF})
+    sns.set_theme(style="white", rc={"font.family": "serif","font.serif": FONT_SERIF})
     fig_width = max(18, 4.2 * len(group_order) + 2.2 * len(combo_order))
     fig_height = max(8, 0.35 * len(sut_order) + 2.5)
     fig, axes = plt.subplots(1, len(group_order), figsize=(fig_width, fig_height), sharey=True)
@@ -112,7 +113,7 @@ def plot_heatmap_chart(plot_df: pd.DataFrame, metric: str):
             linecolor="white",
             annot=True,
             fmt=".1f",
-            annot_kws={"fontsize": 9},
+            annot_kws={"fontsize": ANNOT_FONT_SIZE},
             cbar=idx == len(group_order) - 1,
             cbar_kws={"label": metric_cfg["cbar_label"], "shrink": 0.75},
             ax=ax,

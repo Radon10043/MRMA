@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2026-05-21 22:20:21
 LastEditors  : Radon
-LastEditTime : 2026-05-24 20:55:01
+LastEditTime : 2026-06-05 16:35:50
 Description  : Plot bar chart
 """
 
@@ -88,13 +88,19 @@ def plot_bar_chart(plot_df: pd.DataFrame):
     ax.set_yticks(range(0, 101, 20))
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
 
-    legend = ax.get_legend()
-    if legend:
-        legend.set_title("")
-        legend.set_loc("upper right")
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(
+        handles,
+        labels,
+        loc="upper center",
+        bbox_to_anchor=(0.5, 1.25),
+        ncol=len(GROUP_ORDER),
+        title="",
+        frameon=False,
+    )
 
     fig.tight_layout()
-    fig.subplots_adjust(top=0.98, wspace=0.35)
+    fig.subplots_adjust(top=0.9, wspace=0.35)
     fig.savefig(os.path.join(os.path.dirname(__file__), "bar.pdf"), dpi=300)
     plt.close(fig)
 

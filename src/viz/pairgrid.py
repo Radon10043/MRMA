@@ -141,9 +141,9 @@ def plot_pairgrid_chart(plot_df: pd.DataFrame):
         fontsize=LEGEND_FONT_SIZE,
     )
 
-    fig.tight_layout()
-    fig.subplots_adjust(top=0.92, bottom=0.09, wspace=0.22)
-    fig.savefig(os.path.join(os.path.dirname(__file__), "pairgrid.pdf"), dpi=300)
+    fig.tight_layout(pad=0.4)
+    fig.subplots_adjust(top=0.93, bottom=0.045, wspace=0.22)
+    fig.savefig(os.path.join(os.path.dirname(__file__), "pairgrid.pdf"), dpi=300, bbox_inches="tight", pad_inches=0.02)
     plt.close(fig)
 
 

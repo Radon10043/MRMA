@@ -133,9 +133,9 @@ def plot_heatmap_chart(plot_df: pd.DataFrame, metric: str):
             cbar.ax.tick_params(labelsize=CBAR_FONT_SIZE)
             cbar.ax.yaxis.label.set_size(CBAR_FONT_SIZE)
 
-    fig.supxlabel(metric_cfg["x_label"], fontsize=LABEL_FONT_SIZE, y=0.035)
+    fig.supxlabel(metric_cfg["x_label"], fontsize=LABEL_FONT_SIZE, y=0.005)
     fig.tight_layout()
-    fig.subplots_adjust(bottom=0.13)
+    fig.subplots_adjust(bottom=0.09)
     fig.savefig(os.path.join(os.path.dirname(__file__), metric_cfg["output"]), dpi=300)
     plt.close(fig)
 

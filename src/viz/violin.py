@@ -2,7 +2,7 @@
 Author       : Radon
 Date         : 2026-05-23 19:32:48
 LastEditors  : Radon
-LastEditTime : 2026-05-27 18:07:26
+LastEditTime : 2026-06-06 10:56:12
 Description  : Plot violin chart
 """
 
@@ -131,7 +131,7 @@ def plot_violin_chart(plot_df: pd.DataFrame):
     chart_df["metric_label"] = chart_df["metric"].map({"legal_rate": "LR", "corr_rate": "CR"})
 
     sns.set_theme(style="ticks", rc={"font.family": "serif", "font.serif": FONT_SERIF})
-    fig, ax = plt.subplots(figsize=(20, 8))
+    fig, ax = plt.subplots(figsize=(20, 6))
     sns.violinplot(
         data=chart_df,
         x="group",
@@ -146,6 +146,8 @@ def plot_violin_chart(plot_df: pd.DataFrame):
 
     ax.set_xlabel("")
     ax.set_ylabel("Rate (%)", fontsize=LABEL_FONT_SIZE)
+    ax.set_ylim(-40, 140)
+    ax.set_yticks(range(-25, 126, 25))
     ax.tick_params(axis="both", which="both", labelsize=TICK_FONT_SIZE, colors="black", length=6, width=1.5)
     tick_labels = [label.get_text().removeprefix("single_") for label in ax.get_xticklabels()]
     ax.set_xticks(
